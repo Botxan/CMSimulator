@@ -1,0 +1,33 @@
+body {
+  background-color: #F0F2F5;
+}
+
+.setup, .address, .simulator, .explanation, .statistics {
+  background-color: #fff;
+}
+
+body {
+  margin-top: 1vh;
+}
+
+.setup {
+  height: 98vh;
+}
+
+.right-section {
+  height: 98vh;
+}
+
+.address {
+  height: 25vh;
+}
+
+.simulator {
+  height: 53vh;
+  margin-top: 2vh;
+}
+
+.explanation, .statistics {
+  height: 16vh;
+  margin-top: 2vh;
+}

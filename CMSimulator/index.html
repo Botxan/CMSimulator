@@ -15,7 +15,155 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <h1>Bienvenidos a bienvenhgfidos</h1>
+    <div class="main px-4">
+        <div class="row gx-5">
+            <div class="col-md-4">
+                <div class="setup p-3 shadow-sm">
+                    <h1>CMSimulator</h1>
+                    <form action="">
+                        <div class="msizes">
+                            <!-- MM size -->
+                            <div class="form-outline mb-4">
+                                <input type="text" id="mmsize" class="form-control" />
+                                <label class="form-label" for="mmsize">Main memory size</label>
+                            </div>
+                            <!-- CM size -->
+                            <div class="form-outline">
+                                <input type="text" id="cmsize" class="form-control" />
+                                <label class="form-label" for="cmsize">Cache memory size</label>
+                            </div>        
+                        </div>
+                        
+                        <!-- Placement policy -->
+                        <div class="ppolicy">
+                            <div class="btn-group">
+                                <input type="radio" class="btn-check" name="placement-policy" id="direct" autocomplete="off" checked/>
+                                <label class="btn btn-secondary" for="direct">Direct-map</label>
+                            
+                                <input type="radio" class="btn-check" name="placement-policy" id="fully-associative" autocomplete="off" />
+                                <label class="btn btn-secondary" for="fully-associative">Fully associative</label>
+                            
+                                <input type="radio" class="btn-check" name="placement-policy" id="set-associative" autocomplete="off" />
+                                <label class="btn btn-secondary" for="set-associative">Set-associative</label>
+                            </div>
+
+                            <div class="form-outline">
+                                <input type="text" id="sets" class="form-control" />
+                                <label class="form-label" for="cmsize">Nº sets</label>
+                            </div>
+                        </div>
+        
+                        <!-- Writing policy -->
+                        <div class="writing-policy">
+                            <div class="btn-group">
+                                <input type="radio" class="btn-check" name="writing-policy" id="through" autocomplete="off" checked/>
+                                <label class="btn btn-secondary" for="through">Write through</label>
+                            
+                                <input type="radio" class="btn-check" name="writing-policy" id="back" autocomplete="off" />
+                                <label class="btn btn-secondary" for="back">Write back</label>
+                            </div>
+                        </div>
+        
+                        <!-- Replacement policy -->
+                        <div class="replacement-policy">
+                            <div class="btn-group">
+                                <input type="radio" class="btn-check" name="replacement-policy" id="lru" autocomplete="off" checked/>
+                                <label class="btn btn-secondary" for="lru">LRU</label>
+
+                                <input type="radio" class="btn-check" name="replacement-policy" id="fifo" autocomplete="off" />
+                                <label class="btn btn-secondary" for="fifo">FIFO</label>
+                            </div>
+                        </div>
+        
+                        <button type="button" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="right-section">  
+                    <!-- Address section -->
+                    <div class="address p-3 shadow-sm">
+                        <!-- Address structures -->
+                        <div class="address-structures d-flex flex-row justify-content-around">
+                            <div class="d-flex">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>BLOCK</th>
+                                            <th>WORD</th>
+                                            <th>BYTE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex">       
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>BLOCK</th>
+                                            <th>WORD</th>
+                                            <th>BYTE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+        
+                        <!-- Address input -->
+                        <div class="address-input shadow-sm">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" aria-label="Text input with dropdown button" placeholder="Separate by commas: 13f,45a,96b..." />
+                                <button class="btn btn-primary dropdown-toggle" type="button" data-mdb-toggle="dropdown" aria-expanded="false">Dropdown</button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">Read</a></li>
+                                    <li><a class="dropdown-item" href="#">Write</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- Random and send -->
+                        <div class="writing-policy">
+                            <div class="btn-group">
+                                <input type="radio" class="btn-check" name="writing-policy" id="random-addr" autocomplete="off" checked/>
+                                <label class="btn btn-secondary" for="random-addr">Random</label>
+                            
+                                <input type="radio" class="btn-check" name="writing-policy" id="send-addr" autocomplete="off" />
+                                <label class="btn btn-secondary" for="send-addr">Send</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="simulator p-3 shadow-sm">Cache simulator</div>
+                    <div class="explanation-statistics row gx-5">
+                        <div class="col-sm-8">
+                            <div class="explanation p-3 shadow-sm">
+                                Explanation
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="statistics p-3 shadow-sm">
+                                Statistics
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>    
+        </div>
+    </div>
+    
     <!-- MDB -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"></script>
     <!-- Own JS -->

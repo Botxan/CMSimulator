@@ -5,6 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMSimulator</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico"/>
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet"/>
     <!-- Google Fonts -->
@@ -18,64 +20,97 @@
     <div class="main px-4">
         <div class="row gx-5">
             <div class="col-md-4">
-                <div class="setup p-3 shadow-sm">
+                <div class="setup p-3 shadow-sm d-flex flex-column">
                     <h1>CMSimulator</h1>
-                    <form action="">
-                        <div class="msizes">
+                    <form action="" class="flex-grow-1 d-flex flex-column">
+                        <div class="sizes mb-2">  
+                            <h6 class="mb-3">Sizes</h6>       
                             <!-- MM size -->
-                            <div class="form-outline mb-4">
-                                <input type="text" id="mmsize" class="form-control" />
-                                <label class="form-label" for="mmsize">Main memory size</label>
+                            <div class="form-group row ">
+                                <label for="mmsize" class="col-sm-6 col-form-label">Main memory size</label>
+                                <div class="col-sm-6">
+                                    <input type="number" id="mmsize" class="form-control" placeholder="2ⁿ bytes">
+                                </div>
                             </div>
                             <!-- CM size -->
-                            <div class="form-outline">
-                                <input type="text" id="cmsize" class="form-control" />
-                                <label class="form-label" for="cmsize">Cache memory size</label>
-                            </div>        
+                            <div class="form-group row">
+                                <label for="cmsize" class="col-sm-6 col-form-label">Cache memory size</label>
+                                <div class="col-sm-6">
+                                    <input type="number" id="cmsize" class="form-control" placeholder="2ⁿ bytes">
+                                </div>
+                            </div>
+                            <!-- Words per block -->
+                            <div class="form-group row">
+                                <label for="words-per-block" class="col-sm-6 col-form-label">Words per block</label>
+                                <div class="col-sm-6">
+                                    <input type="number" id="words-per-block" class="form-control" placeholder="2ⁿ">
+                                </div>
+                            </div>
+                            <!-- Word size -->
+                            <div class="form-group row">
+                                <label for="wsize" class="col-sm-6 col-form-label">Word size</label>
+                                <div class="col-sm-6">
+                                    <input type="number" id="word-size" class="form-control" placeholder="2ⁿ bytes">
+                                </div>
+                            </div>
                         </div>
                         
+                        <hr>
+
                         <!-- Placement policy -->
-                        <div class="ppolicy">
-                            <div class="btn-group">
+                        <div class="placement-policy mt-2 mb-2">
+                            <h6 class="mb-3">Placement policy</h6>
+                            <div class="btn-group w-100">
                                 <input type="radio" class="btn-check" name="placement-policy" id="direct" autocomplete="off" checked/>
-                                <label class="btn btn-secondary" for="direct">Direct-map</label>
+                                <label class="btn btn-primary" for="direct">Direct-map</label>
                             
                                 <input type="radio" class="btn-check" name="placement-policy" id="fully-associative" autocomplete="off" />
-                                <label class="btn btn-secondary" for="fully-associative">Fully associative</label>
+                                <label class="btn btn-primary" for="fully-associative">Fully associative</label>
                             
                                 <input type="radio" class="btn-check" name="placement-policy" id="set-associative" autocomplete="off" />
-                                <label class="btn btn-secondary" for="set-associative">Set-associative</label>
-                            </div>
-
-                            <div class="form-outline">
-                                <input type="text" id="sets" class="form-control" />
-                                <label class="form-label" for="cmsize">Nº sets</label>
-                            </div>
+                                <label class="btn btn-primary" for="set-associative">Set-associative</label>
+                            </div>          
+                            <!-- Number of sets -->
+                            <div class="form-group row">
+                                <label for="nsets" class="col-sm-6 col-form-label">Number of sets</label>
+                                <div class="col-sm-6 mt-2">
+                                    <input type="number" id="nsets" class="form-control" placeholder="2ⁿ bytes">
+                                </div>
+                            </div> 
                         </div>
+
+                        <hr>
         
                         <!-- Writing policy -->
-                        <div class="writing-policy">
-                            <div class="btn-group">
+                        <div class="writing-policy mt-2 mb-2">
+                            <h6 class="mb-3">Writing policy</h6>
+                            <div class="btn-group w-100">
                                 <input type="radio" class="btn-check" name="writing-policy" id="through" autocomplete="off" checked/>
-                                <label class="btn btn-secondary" for="through">Write through</label>
+                                <label class="btn btn-primary" for="through">Write through</label>
                             
                                 <input type="radio" class="btn-check" name="writing-policy" id="back" autocomplete="off" />
-                                <label class="btn btn-secondary" for="back">Write back</label>
+                                <label class="btn btn-primary" for="back">Write back</label>
                             </div>
                         </div>
+
+                        <hr>
         
                         <!-- Replacement policy -->
-                        <div class="replacement-policy">
-                            <div class="btn-group">
+                        <div class="replacement-policy mt-2 mb-2">
+                            <h6 class="mb-3">Replacement policy</h6>
+                            <div class="btn-group w-100">
                                 <input type="radio" class="btn-check" name="replacement-policy" id="lru" autocomplete="off" checked/>
-                                <label class="btn btn-secondary" for="lru">LRU</label>
+                                <label class="btn btn-primary" for="lru">LRU</label>
 
                                 <input type="radio" class="btn-check" name="replacement-policy" id="fifo" autocomplete="off" />
-                                <label class="btn btn-secondary" for="fifo">FIFO</label>
+                                <label class="btn btn-primary" for="fifo">FIFO</label>
                             </div>
                         </div>
-        
-                        <button type="button" class="btn btn-primary">Submit</button>
+
+                        <hr>
+                        <div class="d-flex flex-grow-1 align-items-end mt-2">
+                            <button type="button" class="btn btn-primary w-100">Submit</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -124,25 +159,15 @@
                         </div>
         
                         <!-- Address input -->
-                        <div class="address-input shadow-sm">
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control" aria-label="Text input with dropdown button" placeholder="Separate by commas: 13f,45a,96b..." />
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-mdb-toggle="dropdown" aria-expanded="false">Dropdown</button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="#">Read</a></li>
-                                    <li><a class="dropdown-item" href="#">Write</a></li>
-                                </ul>
-                            </div>
+                        <div class="input-field mt-4">
+                            <input type="text" id="sets" required="">
+                            <label>Enter addresses separated by commas (34f, 57a, 88c...)</label>
+                            <span></span>
                         </div>
                         <!-- Random and send -->
-                        <div class="writing-policy">
-                            <div class="btn-group">
-                                <input type="radio" class="btn-check" name="writing-policy" id="random-addr" autocomplete="off" checked/>
-                                <label class="btn btn-secondary" for="random-addr">Random</label>
-                            
-                                <input type="radio" class="btn-check" name="writing-policy" id="send-addr" autocomplete="off" />
-                                <label class="btn btn-secondary" for="send-addr">Send</label>
-                            </div>
+                        <div class="random-send d-flex justify-content-between mt-2">
+                            <button type="button" class="btn btn-primary">Generate random address</button>
+                            <button type="button" class="btn btn-primary">Send</button>
                         </div>
                     </div>
 

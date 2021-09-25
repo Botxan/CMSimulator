@@ -115,13 +115,23 @@ function calcNWay(ppolicy, cmsize, wperb, wsize) {
  */
 function calcAddrBits(mmsize, cmsize, wperb, wsize) {
     // var addrBits, byteBits, wordBits, blockBits, tagBits, lineBits, setBits;
-    addrBits = Math.log2(mmsize);
+    // Number of bits for whole address = log2(main memory size in bytes)
+    addrBits = Math.log2(mmsize); 
+    // Bits to identify byte in a word = log2(word size in bytes)
     byteBits = Math.log2(wsize);
+    // Bits to identify a word in a block = log2(words per block)
     wordBits = Math.log2(wperb);
+    // Bits to identify a block in the memory = 
+    // whole address bits - bits for word in block - bits for byte in word
     blockBits = addrBits - (wordBits + byteBits);
+    // Number of lines in cache = cache size / (words per block * word size in bytes)
+    // or cache size / (bytes per block)
     lines = cmsize / (wperb * wsize);
+    // Bits to identify a line in cache memory = log2(number of lines)
     lineBits = Math.log2(lines);
+    // Bits to identify the corresponding set for a block = log2(number of lines / nway)
     setBits = Math.log2(lines / nway);
+    // Bits to identify the tag = bits for the whole block - bits for the set
     tagBits = blockBits - setBits;
 
     console.log("Bits:" + "\nTotal number of bits in address: " + addrBits + ".\nByte in a word: " + byteBits

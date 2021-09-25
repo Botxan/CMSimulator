@@ -28,6 +28,10 @@ body {
   height: 31vh;
 }
 
+.table {
+  text-align: center;
+}
+
 .address button {
   width: 48%;
 }

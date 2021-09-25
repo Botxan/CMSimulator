@@ -1,9 +1,13 @@
 // Form values
-var mmsize, cmsize, wsize, wperb, nwayInput, nway, ppolicy, wpolicy, rpolicy, lines;
+var cmsize, mmsize, wsize, wperb, nwayInput, nway, ppolicy, wpolicy, rpolicy, lines;
 
 // Address bits
 var addrBits, byteBits, wordBits, blockBits, tagBits, lineBits, setBits;
 bitsByte = bitsWord = bitsBlock = bitsTag = bitsLine = bitsSet = 0;
+
+// Address tables
+cmAddr = document.getElementById("CMAddr").tBodies[0];
+mmAddr = document.getElementById("MMAddr").tBodies[0];
 
 // Enable "number of sets" field only in set-associative option
 var ppolicies = document.forms["setupForm"].elements["ppolicy"];
@@ -62,21 +66,29 @@ function validateSetupForm() {
         err += "Choose words per block.\n";
         valid = false;
     }
-
+    
     if (valid) {
         // Calculate n-way the selected placement policy
         nway = calcNWay(ppolicy, cmsize, wperb, wsize);
         nwayInput.value = nway;
         console.log(nway);
 
+        // Change cache memory header (line/set) to line or set depending on placement policy
+        let lineSetHeader = document.getElementById("CMAddr").tHead.rows[0].cells[1];
+        if (ppolicy = "setAssociative") lineSetHeader.innerHTML = "SET";
+        else lineSetHeader.innerHTML = "LINE";
+
+
         // Calculate address bits for cache memory and main memory address structure
         calcAddrBits(mmsize, cmsize, wperb, wsize);
+        updateAddrTables();
     } else alert(err);
 
     // console.log("Form values:\n" + "Main memory size: " + mmsize + ".\nCache memory size: " + cmsize
-    //     + ".\nWord size: " + wsize + ".\nWords per block: " + wperb + ".\nN-way: " + nwayVal
+    //     + ".\nWord size: " + wsize + ".\nWords per block: " + wperb + ".\nN-way: " + nway
     //     + ".\nPlacement policy: " + ppolicy + ".\nWriting policy: " + wpolicy + ".\nWriting policy: " + rpolicy
     // );
+    return false;
 }
 
 /**
@@ -107,14 +119,13 @@ function calcNWay(ppolicy, cmsize, wperb, wsize) {
 }
 
 /**
- * 
+ * Calculates corresponding bits for each part of main memory and cache memory addresses
  * @param {number} mmsize
  * @param {number} cmsize
  * @param {number} wperb
  * @param {number} wsize
  */
 function calcAddrBits(mmsize, cmsize, wperb, wsize) {
-    // var addrBits, byteBits, wordBits, blockBits, tagBits, lineBits, setBits;
     // Number of bits for whole address = log2(main memory size in bytes)
     addrBits = Math.log2(mmsize); 
     // Bits to identify byte in a word = log2(word size in bytes)
@@ -133,9 +144,21 @@ function calcAddrBits(mmsize, cmsize, wperb, wsize) {
     setBits = Math.log2(lines / nway);
     // Bits to identify the tag = bits for the whole block - bits for the set
     tagBits = blockBits - setBits;
-
     console.log("Bits:" + "\nTotal number of bits in address: " + addrBits + ".\nByte in a word: " + byteBits
         + ".\nWord in a block: " + wordBits + ".\nBlock: " + blockBits + ".\nLine: " + lineBits
         + ".\nsetBits: " + setBits + ".\ntagBits: " + tagBits);
+}
+
+function updateAddrTables() {
+    // Update cache memory table
+    cmAddr.rows[0].cells[0].innerHTML = tagBits + "b";
+    cmAddr.rows[0].cells[1].innerHTML = setBits + "b";
+    cmAddr.rows[0].cells[2].innerHTML = wordBits + "b";
+    cmAddr.rows[0].cells[3].innerHTML = byteBits + "b";
+     
+    // Update main memory table
+    mmAddr.rows[0].cells[0].innerHTML = blockBits + "b";
+    mmAddr.rows[0].cells[1].innerHTML = wordBits + "b";
+    mmAddr.rows[0].cells[2].innerHTML = byteBits + "b";
 }
 

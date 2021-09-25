@@ -22,21 +22,21 @@
             <div class="col-md-4">
                 <div class="setup p-3 shadow-sm d-flex flex-column">
                     <h1>CMSimulator</h1>
-                    <form name="setupForm" action="" class="flex-grow-1 d-flex flex-column" onsubmit="validateSetupForm(); return false">
+                    <form name="setupForm" action="" class="flex-grow-1 d-flex flex-column" onsubmit="return validateSetupForm()">
                         <div class="sizes mb-2">  
-                            <h6 class="mb-3">Sizes</h6>       
-                            <!-- MM size -->
-                            <div class="form-group row ">
-                                <label for="mmsize" class="col-sm-6 col-form-label">Main memory size</label>
-                                <div class="col-sm-6">
-                                    <input type="number" name="mmsize" class="form-control" placeholder="2ⁿ bytes" value="2048">
-                                </div>
-                            </div>
+                            <h6 class="mb-3">Sizes</h6> 
                             <!-- CM size -->
                             <div class="form-group row">
                                 <label for="cmsize" class="col-sm-6 col-form-label">Cache memory size</label>
                                 <div class="col-sm-6">
                                     <input type="number" name="cmsize" class="form-control" placeholder="2ⁿ bytes" value="256">
+                                </div>
+                            </div>      
+                            <!-- MM size -->
+                            <div class="form-group row ">
+                                <label for="mmsize" class="col-sm-6 col-form-label">Main memory size</label>
+                                <div class="col-sm-6">
+                                    <input type="number" name="mmsize" class="form-control" placeholder="2ⁿ bytes" value="2048">
                                 </div>
                             </div>
                             <!-- Word size -->
@@ -121,10 +121,11 @@
                         <!-- Address structures -->
                         <div class="address-structures d-flex flex-row justify-content-around">
                             <div class="d-flex">
-                                <table class="table">
+                                <table id="CMAddr" class="table table-sm table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>BLOCK</th>
+                                            <th>TAG</th>
+                                            <th>LINE/SET</th>
                                             <th>WORD</th>
                                             <th>BYTE</th>
                                         </tr>
@@ -134,12 +135,13 @@
                                             <th></th>
                                             <th></th>
                                             <th></th>
+                                            <th></th>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                             <div class="d-flex">       
-                                <table class="table">
+                                <table id="MMAddr" class="table table-sm table-bordered">
                                     <thead>
                                         <tr>
                                             <th>BLOCK</th>

@@ -18,39 +18,39 @@
 </head>
 <body>
     <div class="main px-4">
-        <div class="row gx-5">
+        <div class="row gx-4">
             <div class="col-md-4">
                 <div class="setup p-3 shadow-sm d-flex flex-column">
                     <h1>CMSimulator</h1>
-                    <form action="" class="flex-grow-1 d-flex flex-column">
+                    <form name="setupForm" action="" class="flex-grow-1 d-flex flex-column" onsubmit="validateSetupForm(); return false">
                         <div class="sizes mb-2">  
                             <h6 class="mb-3">Sizes</h6>       
                             <!-- MM size -->
                             <div class="form-group row ">
                                 <label for="mmsize" class="col-sm-6 col-form-label">Main memory size</label>
                                 <div class="col-sm-6">
-                                    <input type="number" id="mmsize" class="form-control" placeholder="2ⁿ bytes">
+                                    <input type="number" name="mmsize" class="form-control" placeholder="2ⁿ bytes" value="2048">
                                 </div>
                             </div>
                             <!-- CM size -->
                             <div class="form-group row">
                                 <label for="cmsize" class="col-sm-6 col-form-label">Cache memory size</label>
                                 <div class="col-sm-6">
-                                    <input type="number" id="cmsize" class="form-control" placeholder="2ⁿ bytes">
-                                </div>
-                            </div>
-                            <!-- Words per block -->
-                            <div class="form-group row">
-                                <label for="words-per-block" class="col-sm-6 col-form-label">Words per block</label>
-                                <div class="col-sm-6">
-                                    <input type="number" id="words-per-block" class="form-control" placeholder="2ⁿ">
+                                    <input type="number" name="cmsize" class="form-control" placeholder="2ⁿ bytes" value="256">
                                 </div>
                             </div>
                             <!-- Word size -->
                             <div class="form-group row">
                                 <label for="wsize" class="col-sm-6 col-form-label">Word size</label>
                                 <div class="col-sm-6">
-                                    <input type="number" id="word-size" class="form-control" placeholder="2ⁿ bytes">
+                                    <input type="number" name="wsize" class="form-control" placeholder="Bytes" value="4">
+                                </div>
+                            </div>
+                            <!-- Words per block -->
+                            <div class="form-group row">
+                                <label for="wperb" class="col-sm-6 col-form-label">Words per block</label>
+                                <div class="col-sm-6">
+                                    <input type="number" name="wperb" class="form-control" placeholder="2ⁿ" value="8">
                                 </div>
                             </div>
                         </div>
@@ -61,22 +61,22 @@
                         <div class="placement-policy mt-2 mb-2">
                             <h6 class="mb-3">Placement policy</h6>
                             <div class="btn-group w-100">
-                                <input type="radio" class="btn-check" name="placement-policy" id="direct" autocomplete="off" checked/>
-                                <label class="btn btn-primary" for="direct">Direct-map</label>
+                                <input type="radio" id="directMap" class="btn-check" name="ppolicy" value="directMap" checked/>
+                                <label class="btn btn-primary" for="directMap">Direct-map</label>
                             
-                                <input type="radio" class="btn-check" name="placement-policy" id="fully-associative" autocomplete="off" />
-                                <label class="btn btn-primary" for="fully-associative">Fully associative</label>
+                                <input type="radio" id="fullyAssociative" class="btn-check" name="ppolicy" value="fullyAssociative"/>
+                                <label class="btn btn-primary" for="fullyAssociative">Fully associative</label>
                             
-                                <input type="radio" class="btn-check" name="placement-policy" id="set-associative" autocomplete="off" />
-                                <label class="btn btn-primary" for="set-associative">Set-associative</label>
+                                <input type="radio" id="setAssociative" class="btn-check" name="ppolicy" value="setAssociative"/>
+                                <label class="btn btn-primary" for="setAssociative">Set-associative</label>
                             </div>          
                             <!-- Number of sets -->
                             <div class="form-group row">
-                                <label for="nsets" class="col-sm-6 col-form-label">Number of sets</label>
+                                <label for="nway" class="col-sm-6 col-form-label">N-way</label>
                                 <div class="col-sm-6 mt-2">
-                                    <input type="number" id="nsets" class="form-control" placeholder="2ⁿ bytes">
+                                    <input type="number" name="nway" class="form-control" placeholder="N" disabled>
                                 </div>
-                            </div> 
+                            </div>
                         </div>
 
                         <hr>
@@ -85,11 +85,11 @@
                         <div class="writing-policy mt-2 mb-2">
                             <h6 class="mb-3">Writing policy</h6>
                             <div class="btn-group w-100">
-                                <input type="radio" class="btn-check" name="writing-policy" id="through" autocomplete="off" checked/>
-                                <label class="btn btn-primary" for="through">Write through</label>
+                                <input type="radio" id="writeThrough" class="btn-check" name="wpolicy" value="writeThrough" autocomplete="off" checked/>
+                                <label class="btn btn-primary" for="writeThrough">Write through</label>
                             
-                                <input type="radio" class="btn-check" name="writing-policy" id="back" autocomplete="off" />
-                                <label class="btn btn-primary" for="back">Write back</label>
+                                <input type="radio" id="writeBack" class="btn-check" name="wpolicy" value="writeBack" autocomplete="off" />
+                                <label class="btn btn-primary" for="writeBack">Write back</label>
                             </div>
                         </div>
 
@@ -99,17 +99,17 @@
                         <div class="replacement-policy mt-2 mb-2">
                             <h6 class="mb-3">Replacement policy</h6>
                             <div class="btn-group w-100">
-                                <input type="radio" class="btn-check" name="replacement-policy" id="lru" autocomplete="off" checked/>
+                                <input type="radio" id="lru" class="btn-check" name="rpolicy" value="lru" autocomplete="off" checked/>
                                 <label class="btn btn-primary" for="lru">LRU</label>
 
-                                <input type="radio" class="btn-check" name="replacement-policy" id="fifo" autocomplete="off" />
+                                <input type="radio" id="fifo" class="btn-check" name="rpolicy" value="fifo" autocomplete="off" />
                                 <label class="btn btn-primary" for="fifo">FIFO</label>
                             </div>
                         </div>
 
                         <hr>
                         <div class="d-flex flex-grow-1 align-items-end mt-2">
-                            <button type="button" class="btn btn-primary w-100">Submit</button>
+                            <button type="submit" class="btn btn-primary w-100">Submit</button>
                         </div>
                     </form>
                 </div>

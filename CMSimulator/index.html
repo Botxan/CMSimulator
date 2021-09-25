@@ -119,47 +119,71 @@
                     <!-- Address section -->
                     <div class="address p-3 shadow-sm">
                         <!-- Address structures -->
-                        <div class="address-structures d-flex flex-row justify-content-around">
-                            <div class="d-flex">
-                                <table id="CMAddr" class="table table-sm table-bordered">
-                                    <thead>
+                        <div class="address-structures d-flex flex-row justify-content-between">
+                            <div class="text-center">
+                                <h6 data-mdb-toggle="tooltip" title="Log₂(CM size)">Cache memory address structure</h6>
+                                <table id="CMAddr" class="table">
+                                    <thead class="table-dark">
                                         <tr>
-                                            <th>TAG</th>
-                                            <th>LINE/SET</th>
-                                            <th>WORD</th>
-                                            <th>BYTE</th>
+                                            <th data-mdb-toggle="tooltip" title="Bits for block - bits for line/set">TAG</th>
+                                            <th data-mdb-toggle="tooltip" title="CM size / (Words per blck + Word size)">LINE/SET</th>
+                                            <th data-mdb-toggle="tooltip" title="Log₂(Words per block)">WORD</th>
+                                            <th data-mdb-toggle="tooltip" title="Log₂(Word size)">BYTE</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <th></th>
-                                            <th></th>
-                                            <th></th>
-                                            <th></th>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="d-flex">       
-                                <table id="MMAddr" class="table table-sm table-bordered">
-                                    <thead>
+                            <div class="text-center">
+                                <h6 data-mdb-toggle="tooltip" title="Log₂(MM size)">Main memory address structure</h6>       
+                                <table id="MMAddr" class="table">
+                                    <thead class="table-dark">
                                         <tr>
-                                            <th>BLOCK</th>
-                                            <th>WORD</th>
-                                            <th>BYTE</th>
+                                            <th data-mdb-toggle="tooltip" title="Address length - (word bits + byte bits)">BLOCK</th>
+                                            <th data-mdb-toggle="tooltip" title="Log₂(Words per block)">WORD</th>
+                                            <th data-mdb-toggle="tooltip" title="Log₂(Word size)">BYTE</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <th></th>
-                                            <th></th>
-                                            <th></th>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                            <div id="calculations" class="calculations">
+                                <h6>Calculations</h6>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        Address length:
+                                        <br>
+                                        Byte in word:
+                                        <br>
+                                        Word in block:
+                                        <br>
+                                        Block:
+                                        <br>
+                                        Line:
+                                        <br>
+                                        Set:
+                                        <br>
+                                        Tag:
+                                    </div>
+                                    <div id="results" class="col-sm-6 results">
+                                    </div>
+                                </div>
                             </div>
                         </div>
-        
+                            
                         <!-- Address input -->
                         <div class="input-field mt-4">
                             <input type="text" id="sets" required="">
@@ -172,8 +196,9 @@
                             <button type="button" class="btn btn-primary">Send</button>
                         </div>
                     </div>
-
-                    <div class="simulator p-3 shadow-sm">Cache simulator</div>
+                    <div class="simulator p-3 shadow-sm">
+                        
+                    </div>
                     <div class="explanation-statistics row gx-5">
                         <div class="col-sm-8">
                             <div class="explanation p-3 shadow-sm">

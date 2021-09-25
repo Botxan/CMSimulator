@@ -32,6 +32,14 @@ body {
   text-align: center;
 }
 
+.calculations {
+  flex-grow: .5;
+}
+
+.calculations div  {
+  font-size: 10px;
+}
+
 .address button {
   width: 48%;
 }

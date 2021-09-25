@@ -82,6 +82,7 @@ function validateSetupForm() {
         // Calculate address bits for cache memory and main memory address structure
         calcAddrBits(mmsize, cmsize, wperb, wsize);
         updateAddrTables();
+        printCalculations();
     } else alert(err);
 
     // console.log("Form values:\n" + "Main memory size: " + mmsize + ".\nCache memory size: " + cmsize
@@ -160,5 +161,16 @@ function updateAddrTables() {
     mmAddr.rows[0].cells[0].innerHTML = blockBits + "b";
     mmAddr.rows[0].cells[1].innerHTML = wordBits + "b";
     mmAddr.rows[0].cells[2].innerHTML = byteBits + "b";
+}
+
+function printCalculations() {
+    document.getElementById("results").innerHTML = 
+    "Log₂(" + mmsize + ") = " + addrBits + " bits.<br />" +
+    "Log₂(" + wsize + ") = " + byteBits + " bits.<br />" +
+    "Log₂(" + wperb + ") = " + wordBits + " bits.<br />" +
+    addrBits + " - (" + wordBits + " + " + byteBits + ") = " + blockBits + " bits.<br />" +
+    "Log₂(" + lines + ") = " + lineBits + " bits.<br />" +
+    "Log₂(" + lines + " / " + nway + ") = " + setBits + " bits.<br />" +
+    blockBits +  " - " + setBits + " = " + tagBits + " bits."
 }
 

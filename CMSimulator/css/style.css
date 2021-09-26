@@ -1,3 +1,7 @@
+.btn {
+  padding: .375rem .75rem;
+}
+
 body {
   background-color: #F1F1F1;
 }
@@ -18,14 +22,15 @@ body {
 
 .setup > h1 {
   padding: 10px 0px 30px 0px;
-} 
+}
+
+.addr-structures table th,
+.addr-structures table td {
+  min-width: 3px;
+}
 
 .right-section {
   height: 98vh;
-}
-
-.address {
-  height: 31vh;
 }
 
 .table {
@@ -33,107 +38,43 @@ body {
 }
 
 .calculations {
-  flex-grow: .5;
+  flex-grow: .1;
+  min-width: 210px;
 }
 
-.calculations div  {
-  font-size: 10px;
+.calculations > h6 {
+  text-align: center;
 }
 
-.address button {
-  width: 48%;
+.calculations > .row > .result-identifiers {
+  text-align: right;
+}
+
+.calculations div {
+  line-height: 1.2;
+  font-size: .79em;
 }
 
 .simulator {
-  height: 47vh;
+  height: 55vh;
   margin-top: 2vh;
+  overflow: auto;
+}
+
+.directory th, .directory td, .content th, .content td, .mm td {
+  padding: 0 !important;
+}
+
+.mm {
+  font-size: .6em;;
+}
+
+.table-wrapper {
+  max-height: 40vh;
+  overflow: auto;
 }
 
 .explanation, .statistics {
   height: 16vh;
   margin-top: 2vh;
 }
-
-
-
-/* Custom input styles */
-
-input {
-  outline: 0;
-  border: 0;
-}
-
-.input-field {
-  position: relative;
-  height: 35px;
-  width: 100%;
-}
-
-.input-field input[type="text"], .input-field input[type="number"] {
-  position: absolute;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  font-size: 16px;
-  color: #4f4f4f;
-  width: 100%;
-}
-
-::placeholder {
-  color: red;
-}
-
-.input-field label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  color: #555;
-  pointer-events: none;
-  display: block;
-  transition: 0.5s;
-}
-
-.input-field input[type="text"]:focus + label,
-.input-field input[type="number"]:focus + label
-.input-field input[type="text"]:valid + label,
-.input-field input[type="number"]:valid + label {
-  transform: translateX(-5px) translateY(-20px);
-  font-size: 12px;
-  color: #4f4f4f;
-  padding: 2px 6px;
-  color: #0091D5;
-}
-
-.input-field span {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  display: block;
-  background: #1C4E80;
-  width: 100%;
-  height: 2px;
-}
-
-.input-field span:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #0091D5;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.5s ease-in-out;
-}
-
-.input-field input[type="text"]:focus ~ span:before,
-.input-field input[type="number"]:focus ~ span:before
-.input-field input[type="text"]:valid ~ span:before,
-.input-field input[type="number"]:valid ~ span:before {
-  transform: scaleX(1);
-  transform-origin: left;
-  transition: transform 0.5s ease-in-out;
-}
-
-/* /Custom input styles */

@@ -8,205 +8,296 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="img/favicon.ico"/>
     <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet"/>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
-    <!-- MDB -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+    <!-- Google Fonts Roboto -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- Material Design Bootstrap -->
+    <link rel="stylesheet" href="css/mdb.min.css">
     <!-- Own css -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="main px-4">
-        <div class="row gx-4">
-            <div class="col-md-4">
-                <div class="setup p-3 shadow-sm d-flex flex-column">
+        <div class="row gx-3">
+            <div class="col-md-3">
+                <div class="setup p-3 z-depth-1 d-flex flex-column">
                     <h1>CMSimulator</h1>
                     <form name="setupForm" action="" class="flex-grow-1 d-flex flex-column" onsubmit="return validateSetupForm()">
                         <div class="sizes mb-2">  
                             <h6 class="mb-3">Sizes</h6> 
-                            <!-- CM size -->
-                            <div class="form-group row">
-                                <label for="cmsize" class="col-sm-6 col-form-label">Cache memory size</label>
-                                <div class="col-sm-6">
-                                    <input type="number" name="cmsize" class="form-control" placeholder="2ⁿ bytes" value="256">
+                            <!-- CM -->          
+                            <div class="md-form input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text md-addon">Cache memory</span>
                                 </div>
-                            </div>      
+                                <input type="number" id="cmsize" aria-label="Cache memory size" class="form-control" placeholder="2ⁿ bytes" value="256">
+                                <div class="input-group-append">
+                                    <span class="input-group-text md-addon">B</span>
+                                </div>
+                                <input type="number" id="cmAccessTime" aria-label="Cache memory access time" class="form-control" placeholder="cycles" value="2">
+                                <div class="input-group-append">
+                                    <span class="input-group-text md-addon">cycles</span>
+                                </div>
+
+                            </div>
+
                             <!-- MM size -->
-                            <div class="form-group row ">
-                                <label for="mmsize" class="col-sm-6 col-form-label">Main memory size</label>
-                                <div class="col-sm-6">
-                                    <input type="number" name="mmsize" class="form-control" placeholder="2ⁿ bytes" value="2048">
+                            <div class="md-form input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text md-addon">Main memory</span>
+                                </div>
+                                <input type="number" id="mmsize" aria-label="Main memory size" class="form-control" placeholder="2ⁿ bytes" value="2048">
+                                <div class="input-group-append">
+                                    <span class="input-group-text md-addon">B</span>
+                                </div>
+                                <input type="number" id="mmAccessTime" aria-label="Main memory access time" class="form-control" placeholder="cycles" value="21">
+                                <div class="input-group-append">
+                                    <span class="input-group-text md-addon">cycles</span>
                                 </div>
                             </div>
-                            <!-- Word size -->
-                            <div class="form-group row">
-                                <label for="wsize" class="col-sm-6 col-form-label">Word size</label>
-                                <div class="col-sm-6">
-                                    <input type="number" name="wsize" class="form-control" placeholder="Bytes" value="4">
+
+                            <!-- Words per block / Bytes per block -->
+                            <div class="md-form input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text md-addon">Block / Word</span>
                                 </div>
-                            </div>
-                            <!-- Words per block -->
-                            <div class="form-group row">
-                                <label for="wperb" class="col-sm-6 col-form-label">Words per block</label>
-                                <div class="col-sm-6">
-                                    <input type="number" name="wperb" class="form-control" placeholder="2ⁿ" value="8">
+                                <input type="number" id="wsize" aria-label="Words per block" class="form-control" placeholder="Words/Block" value="8">
+                                <div class="input-group-append">
+                                    <span class="input-group-text md-addon">words</span>
+                                </div>
+                                <input type="number" id="wperb" aria-label="Bytes per word" class="form-control" placeholder="Bytes/Word" value="4">
+                                <div class="input-group-append">
+                                    <span class="input-group-text md-addon">bytes</span>
                                 </div>
                             </div>
                         </div>
-                        
-                        <hr>
 
                         <!-- Placement policy -->
                         <div class="placement-policy mt-2 mb-2">
-                            <h6 class="mb-3">Placement policy</h6>
-                            <div class="btn-group w-100">
-                                <input type="radio" id="directMap" class="btn-check" name="ppolicy" value="directMap" checked/>
-                                <label class="btn btn-primary" for="directMap">Direct-map</label>
-                            
-                                <input type="radio" id="fullyAssociative" class="btn-check" name="ppolicy" value="fullyAssociative"/>
-                                <label class="btn btn-primary" for="fullyAssociative">Fully associative</label>
-                            
-                                <input type="radio" id="setAssociative" class="btn-check" name="ppolicy" value="setAssociative"/>
-                                <label class="btn btn-primary" for="setAssociative">Set-associative</label>
-                            </div>          
+                            <h6 class="mb-3">Placement policy</h6>                            
+                            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                                <label class="btn btn-primary active">
+                                    <input type="radio" name="ppolicy" checked autocomplete="off" value="directMap">
+                                    Direct-map
+                                </label>
+                                <label class="btn btn-primary">
+                                    <input type="radio" autocomplete="off" name="ppolicy" value="fullyAssociative">
+                                    Fully Associative
+                                </label>
+                                <label class="btn btn-primary">
+                                    <input type="radio" autocomplete="off" name="ppolicy" value="setAssociative">
+                                    Set-Associative
+                                </label>
+                            </div>
+
                             <!-- Number of sets -->
-                            <div class="form-group row">
-                                <label for="nway" class="col-sm-6 col-form-label">N-way</label>
-                                <div class="col-sm-6 mt-2">
-                                    <input type="number" name="nway" class="form-control" placeholder="N" disabled>
+                            <div class="md-form input-group mt-2 mb-3">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text md-addon" name="nway-span">N-way</span>
+                                </div>
+                                <input type="text" name="nway" aria-label="nway" class="form-control" disabled>
+                                <div class="input-group-append">
+                                    <span class="input-group-text md-addon">line/set</span>
                                 </div>
                             </div>
                         </div>
-
-                        <hr>
         
                         <!-- Writing policy -->
                         <div class="writing-policy mt-2 mb-2">
                             <h6 class="mb-3">Writing policy</h6>
-                            <div class="btn-group w-100">
-                                <input type="radio" id="writeThrough" class="btn-check" name="wpolicy" value="writeThrough" autocomplete="off" checked/>
-                                <label class="btn btn-primary" for="writeThrough">Write through</label>
-                            
-                                <input type="radio" id="writeBack" class="btn-check" name="wpolicy" value="writeBack" autocomplete="off" />
-                                <label class="btn btn-primary" for="writeBack">Write back</label>
+                            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                                <label class="btn btn-primary active">
+                                    <input type="radio" name="wpolicy" checked autocomplete="off" value="writeThrough">
+                                    Write-through
+                                </label>
+                                <label class="btn btn-primary">
+                                    <input type="radio" name="wpolicy" autocomplete="off" value="writeBack">
+                                    Write-back
+                                </label>
                             </div>
                         </div>
-
-                        <hr>
         
                         <!-- Replacement policy -->
                         <div class="replacement-policy mt-2 mb-2">
                             <h6 class="mb-3">Replacement policy</h6>
-                            <div class="btn-group w-100">
-                                <input type="radio" id="lru" class="btn-check" name="rpolicy" value="lru" autocomplete="off" checked/>
-                                <label class="btn btn-primary" for="lru">LRU</label>
-
-                                <input type="radio" id="fifo" class="btn-check" name="rpolicy" value="fifo" autocomplete="off" />
-                                <label class="btn btn-primary" for="fifo">FIFO</label>
+                            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                                <label class="btn btn-primary active">
+                                    <input type="radio" name="rpolicy" checked autocomplete="off" value="no">
+                                    No
+                                </label>
+                                <label class="btn btn-primary">
+                                    <input type="radio" autocomplete="off" name="rpolicy" value="lru">
+                                    LRU
+                                </label>
+                                <label class="btn btn-primary">
+                                    <input type="radio" autocomplete="off" name="rpolicy" value="fifo">
+                                    FIFO  
+                                </label>
                             </div>
                         </div>
 
-                        <hr>
                         <div class="d-flex flex-grow-1 align-items-end mt-2">
-                            <button type="submit" class="btn btn-primary w-100">Submit</button>
+                            <button type="submit" class="btn btn-default btn-lg w-100">Submit</button>
                         </div>
                     </form>
                 </div>
             </div>
-            <div class="col-md-8">
+
+            <div class="col-md-9">
+                <!-- Card deck -->
+                <div class="card-deck addr-structures">
+                    <!-- Card for cache memory address -->
+                    <div class="card mb-4">
+                        <div class="table-wrapper">
+                            <!--Table-->
+                            <table id="CMAddr" class="table table-dark table-bordered table-sm mb-0">
+                                <!--Table head-->
+                                <thead>
+                                <tr>
+                                    <th class="th-sm" data-toggle="tooltip" data-placement="right" title="Bits for block - bits for line/set">TAG</th>
+                                    <th class="th-sm" data-toggle="tooltip" data-placement="right" title="CM size / (Words per block + Word size)">SET</th>
+                                    <th class="th-sm" data-toggle="tooltip" data-placement="right"  title="Log₂(Words per block)">WORD</th>
+                                    <th class="th-sm" data-toggle="tooltip" data-placement="right"  title="Log₂(Word size)">BYTE</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Card for main memory address -->
+                    <div class="card mb-4">
+                        <div class="table-wrapper">
+                            <!--Table-->
+                            <table id="MMAddr" class="table table-dark table-bordered table-sm mb-0">     
+                                <!--Table head-->
+                                <thead>
+                                    <tr>
+                                        <th class="th-sm" data-toggle="tooltip" data-placement="right" title="Address length - (word bits + byte bits)">BLOCK</th>
+                                        <th class="th-sm" data-toggle="tooltip" data-placement="right" title="Log₂(Words per block)">WORD</th>
+                                        <th class="th-sm" data-toggle="tooltip" data-placement="right" title="Log₂(Word size)">BYTE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Card -->
+                    <div id="calculations" class="card mb-4">
+                        <!--Card content-->
+                        <div class="card-body">
+                            <!--Text-->
+                            <p class="card-text">Waiting for instruction...</p>
+                        </div>
+                    </div>
+                    <!-- Card -->
+                </div>
+
                 <div class="right-section">  
-                    <!-- Address section -->
-                    <div class="address p-3 shadow-sm">
-                        <!-- Address structures -->
-                        <div class="address-structures d-flex flex-row justify-content-between">
-                            <div class="text-center">
-                                <h6 data-mdb-toggle="tooltip" title="Log₂(CM size)">Cache memory address structure</h6>
-                                <table id="CMAddr" class="table">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th data-mdb-toggle="tooltip" title="Bits for block - bits for line/set">TAG</th>
-                                            <th data-mdb-toggle="tooltip" title="CM size / (Words per blck + Word size)">LINE/SET</th>
-                                            <th data-mdb-toggle="tooltip" title="Log₂(Words per block)">WORD</th>
-                                            <th data-mdb-toggle="tooltip" title="Log₂(Word size)">BYTE</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>-</td>
-                                            <td>-</td>
-                                            <td>-</td>
-                                            <td>-</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="text-center">
-                                <h6 data-mdb-toggle="tooltip" title="Log₂(MM size)">Main memory address structure</h6>       
-                                <table id="MMAddr" class="table">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th data-mdb-toggle="tooltip" title="Address length - (word bits + byte bits)">BLOCK</th>
-                                            <th data-mdb-toggle="tooltip" title="Log₂(Words per block)">WORD</th>
-                                            <th data-mdb-toggle="tooltip" title="Log₂(Word size)">BYTE</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>-</td>
-                                            <td>-</td>
-                                            <td>-</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div id="calculations" class="calculations">
-                                <h6>Calculations</h6>
+                    <!-- Address input -->
+                    <div class="md-form input-group mb-3">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-md btn-primary m-0 px-3" type="button" onclick="getRandomAddr()">Gen. random address</button>
+                        </div>
+                        <input id="address-input" name="address-input" type="text" class="form-control" placeholder="Introduce an address (byte)" aria-label="Send address button">
+                        <div class="input-group-append">
+                            <select class="custom-select">
+                                <option value="1" selected>Ld</option>
+                                <option value="2">St</option>
+                            </select>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-md btn-default m-0 px-3" type="button">Send</button>
+                        </div>
+                    </div>
+                    <div class="simulator p-3 z-depth-1">
+                        <div class="row">
+                            <div class="col-sm-7 text-center">
+                                <h6>Cache memory</h6>
                                 <div class="row">
-                                    <div class="col-sm-6">
-                                        Address length:
-                                        <br>
-                                        Byte in word:
-                                        <br>
-                                        Word in block:
-                                        <br>
-                                        Block:
-                                        <br>
-                                        Line:
-                                        <br>
-                                        Set:
-                                        <br>
-                                        Tag:
+                                    <div class="col-sm-4">
+                                        <div class="table-wrapper">
+                                            <table id="directory" class="table table-bordered table-sm directory">
+                                                <thead>
+                                                    <th>index</th>
+                                                    <th>busy</th>
+                                                    <th>dirty</th>
+                                                    <th>tag</th>
+                                                    <th>repl</th>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                    <div id="results" class="col-sm-6 results">
+                                    <div class="col-sm-8">
+                                        <div class="table wrapper">
+                                            <table id="content" class="table table-bordered table-sm content">
+                                                <thead>
+                                                    <th>content</th>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-5 text-center">
+                                <h6>Main memory</h6>
+                                <div class="table-wrapper">
+                                    <table id="mm" class="table table-sm table-bordered mm">
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="explanation-statistics row gx-3">
+                        <div class="col-sm-8">
+                            <div class="explanation p-2 z-depth-1">
+                                <div id="calculations" class="calculations">
+                                    <h6>Calculations</h6>
+                                    <div class="row">
+                                        <div class="col-sm-6 result-identifiers">
+                                            Address length:
+                                            <br>
+                                            Byte in word:
+                                            <br>
+                                            Word in block:
+                                            <br>
+                                            Block:
+                                            <br>
+                                            Line:
+                                            <br>
+                                            Set:
+                                            <br>
+                                            Tag:
+                                        </div>
+                                        <div id="results" class="col-sm-6 results text-left">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                            
-                        <!-- Address input -->
-                        <div class="input-field mt-4">
-                            <input type="text" id="sets" required="">
-                            <label>Enter addresses separated by commas (34f, 57a, 88c...)</label>
-                            <span></span>
-                        </div>
-                        <!-- Random and send -->
-                        <div class="random-send d-flex justify-content-between mt-2">
-                            <button type="button" class="btn btn-primary">Generate random address</button>
-                            <button type="button" class="btn btn-primary">Send</button>
-                        </div>
-                    </div>
-                    <div class="simulator p-3 shadow-sm">
-                        
-                    </div>
-                    <div class="explanation-statistics row gx-5">
-                        <div class="col-sm-8">
-                            <div class="explanation p-3 shadow-sm">
-                                Explanation
-                            </div>
-                        </div>
                         <div class="col-sm-4">
-                            <div class="statistics p-3 shadow-sm">
+                            <div class="statistics p-3 z-depth-1">
                                 Statistics
                             </div>
                         </div>
@@ -216,9 +307,22 @@
         </div>
     </div>
     
-    <!-- MDB -->
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"></script>
+    <!-- jQuery -->
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="js/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="js/mdb.min.js"></script>
     <!-- Own JS -->
     <script src="js/script.js"></script>
+    <!-- Initialize tooltips -->
+    <script>
+        // Tooltips Initialization
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
 </body>
 </html>

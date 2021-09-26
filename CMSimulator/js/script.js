@@ -71,7 +71,6 @@ function validateSetupForm() {
         // Calculate n-way the selected placement policy
         nway = calcNWay(ppolicy, cmsize, wperb, wsize);
         nwayInput.value = nway;
-        console.log(nway);
 
         // Change cache memory header (line/set) to line or set depending on placement policy
         let lineSetHeader = document.getElementById("CMAddr").tHead.rows[0].cells[1];
@@ -83,6 +82,8 @@ function validateSetupForm() {
         calcAddrBits(mmsize, cmsize, wperb, wsize);
         updateAddrTables();
         printCalculations();
+        buildCM();
+        buildMM();
     } else alert(err);
 
     // console.log("Form values:\n" + "Main memory size: " + mmsize + ".\nCache memory size: " + cmsize
@@ -145,9 +146,9 @@ function calcAddrBits(mmsize, cmsize, wperb, wsize) {
     setBits = Math.log2(lines / nway);
     // Bits to identify the tag = bits for the whole block - bits for the set
     tagBits = blockBits - setBits;
-    console.log("Bits:" + "\nTotal number of bits in address: " + addrBits + ".\nByte in a word: " + byteBits
-        + ".\nWord in a block: " + wordBits + ".\nBlock: " + blockBits + ".\nLine: " + lineBits
-        + ".\nsetBits: " + setBits + ".\ntagBits: " + tagBits);
+    // console.log("Bits:" + "\nTotal number of bits in address: " + addrBits + ".\nByte in a word: " + byteBits
+    //     + ".\nWord in a block: " + wordBits + ".\nBlock: " + blockBits + ".\nLine: " + lineBits
+    //     + ".\nsetBits: " + setBits + ".\ntagBits: " + tagBits);
 }
 
 function updateAddrTables() {
@@ -174,3 +175,46 @@ function printCalculations() {
     blockBits +  " - " + setBits + " = " + tagBits + " bits."
 }
 
+function buildCM() {
+    let directory = document.getElementById("directory").tBodies[0];
+    let content = document.getElementById("content");
+    let row;
+
+    // Empty in case there was previous data
+    directory.innerHTML = "";
+    content.tBodies[0].innerHTML = "";
+
+    for (i = 0; i < lines; i++) {
+        // Directory
+        row = directory.insertRow();
+        row.insertCell().innerHTML = i;
+        for (j = 0; j < 3; j++) row.insertCell().innerHTML = 0;
+        row.insertCell(3).innerHTML = "-";
+        // // Content
+        content.tHead.rows[0].cells[0].colSpan = lines;
+        row = content.tBodies[0].insertRow();
+        for (k = 0; k < lines; k++) row.insertCell().innerHTML = "-";
+    }
+}
+
+function buildMM() {
+    let mm = document.getElementById("mm").tBodies[0];
+    let blSize = wperb * wsize;
+    let row;
+
+    // Empty in case there was previous data
+    mm.innerHTML = "";
+
+    // Block per row
+    for (i = 0; i < mmsize / blSize; i++) {
+        row = mm.insertRow();
+        for (j = 0; j < wperb; j++) {
+            row.insertCell().innerHTML = "B:" + i + " W:" + j;
+        }
+    }
+}
+
+function getRandomAddr() {
+    let address = document.getElementById("address-input");
+    address.value = Math.floor(Math.random() * (mmsize));
+}

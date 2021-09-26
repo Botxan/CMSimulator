@@ -36,7 +36,6 @@ body {
 .table {
   text-align: center;
 }
-
 .calculations {
   flex-grow: .1;
   min-width: 210px;
@@ -65,12 +64,12 @@ body {
   padding: 0 !important;
 }
 
-.mm {
-  font-size: .6em;;
+.mm td {
+  font-size: .7rem;;
 }
 
 .table-wrapper {
-  max-height: 40vh;
+  max-height: 45vh;
   overflow: auto;
 }
 

@@ -63,11 +63,11 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text md-addon">Block / Word</span>
                                 </div>
-                                <input type="number" id="wsize" aria-label="Words per block" class="form-control" placeholder="Words/Block" value="8">
+                                <input type="number" id="wperb" aria-label="Words per block" class="form-control" placeholder="Words/Block" value="8">
                                 <div class="input-group-append">
                                     <span class="input-group-text md-addon">words</span>
                                 </div>
-                                <input type="number" id="wperb" aria-label="Bytes per word" class="form-control" placeholder="Bytes/Word" value="4">
+                                <input type="number" id="wsize" aria-label="Bytes per word" class="form-control" placeholder="Bytes/Word" value="4">
                                 <div class="input-group-append">
                                     <span class="input-group-text md-addon">bytes</span>
                                 </div>
@@ -148,7 +148,7 @@
             <div class="col-md-9">
                 <!-- Card deck -->
                 <div class="card-deck addr-structures">
-                    <!-- Card for cache memory address -->
+                    <!-- Cache memory address -->
                     <div class="card mb-4">
                         <div class="table-wrapper">
                             <!--Table-->
@@ -174,7 +174,16 @@
                         </div>
                     </div>
 
-                    <!-- Card for main memory address -->
+                    <!-- Simulator status -->
+                    <div id="calculations" class="card mb-4">
+                        <!--Card content-->
+                        <div id="simMsgWrapper" class="card-body">
+                            <!--Text-->
+                            <p id="simMsg" class="card-text">Waiting for instruction...</p>
+                        </div>
+                    </div>
+
+                    <!-- Main memory address -->
                     <div class="card mb-4">
                         <div class="table-wrapper">
                             <!--Table-->
@@ -197,36 +206,25 @@
                             </table>
                         </div>
                     </div>
-
-                    <!-- Card -->
-                    <div id="calculations" class="card mb-4">
-                        <!--Card content-->
-                        <div class="card-body">
-                            <!--Text-->
-                            <p class="card-text">Waiting for instruction...</p>
-                        </div>
-                    </div>
-                    <!-- Card -->
                 </div>
-
                 <div class="right-section">  
                     <!-- Address input -->
                     <div class="md-form input-group mb-3">
                         <div class="input-group-prepend">
                             <button class="btn btn-md btn-primary m-0 px-3" type="button" onclick="getRandomAddr()">Gen. random address</button>
                         </div>
-                        <input id="address-input" name="address-input" type="text" class="form-control" placeholder="Introduce an address (byte)" aria-label="Send address button">
+                        <input id="address-input" name="address-input" type="number" class="form-control" placeholder="Introduce an address (byte)" aria-label="Instruction input">
                         <div class="input-group-append">
-                            <select class="custom-select">
-                                <option value="1" selected>Ld</option>
-                                <option value="2">St</option>
+                            <select id="operation" class="custom-select">
+                                <option value="ld" selected>Ld</option>
+                                <option value="st">St</option>
                             </select>
                         </div>
                         <div class="input-group-append">
-                            <button class="btn btn-md btn-default m-0 px-3" type="button">Send</button>
+                            <button class="btn btn-md btn-default m-0 px-3" type="button" onclick="processAddr(parseInt(document.getElementById('address-input').value))">Send</button>
                         </div>
                     </div>
-                    <div class="simulator p-3 z-depth-1">
+                    <div class="simulator p-3 z-depth-1 d-flex flex-column">
                         <div class="row">
                             <div class="col-sm-7 text-center">
                                 <h6>Cache memory</h6>
@@ -268,6 +266,21 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="d-flex flex-grow-1 align-items-end">
+                            <div class="blue-gradient d-flex flex-grow-1 justify-content-center align-items-center" style="margin: auto -16px -16px -16px">
+                                <div>
+                                    <button id="next" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                                        Next
+                                        <i class="fas fa-angle-right"></i>
+                                    </button>
+                                    <button id="fast-forward" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                                        Fast forward
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
                     </div>
                     <div class="explanation-statistics row gx-3">
                         <div class="col-sm-8">

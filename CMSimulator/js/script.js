@@ -1,9 +1,14 @@
 // Form values
 var cmsize, mmsize, wsize, wperb, nwayInput, nway, ppolicy, wpolicy, rpolicy, lines;
 
-// Address bits
+// Address structure bits
 var addrBits, byteBits, wordBits, blockBits, tagBits, lineBits, setBits;
 bitsByte = bitsWord = bitsBlock = bitsTag = bitsLine = bitsSet = 0;
+
+// Bits of specific address
+var bitsB, bitsW, bitsBl, BitsT, bitsS;
+// Decimal values of address bits
+var byte, word, block, tag, set;
 
 // Address tables
 cmAddr = document.getElementById("CMAddr").tBodies[0];
@@ -80,8 +85,20 @@ function validateSetupForm() {
 
         // Calculate address bits for cache memory and main memory address structure
         calcAddrBits(mmsize, cmsize, wperb, wsize);
-        updateAddrTables();
+
+        // Update CM table
+        updateCMTable(0, 0, tagBits + "b");
+        updateCMTable(0, 1, setBits + "b");
+        updateCMTable(0, 2, wordBits + "b");
+        updateCMTable(0, 3, byteBits + "b");
+
+        // Update MM table
+        updateMMTable(0, 0, blockBits + "b");
+        updateMMTable(0, 1, wordBits + "b");
+        updateMMTable(0, 2, byteBits + "b");
+
         printCalculations();
+        document.getElementById("address-input").focus();
         buildCM();
         buildMM();
     } else alert(err);
@@ -151,17 +168,12 @@ function calcAddrBits(mmsize, cmsize, wperb, wsize) {
     //     + ".\nsetBits: " + setBits + ".\ntagBits: " + tagBits);
 }
 
-function updateAddrTables() {
-    // Update cache memory table
-    cmAddr.rows[0].cells[0].innerHTML = tagBits + "b";
-    cmAddr.rows[0].cells[1].innerHTML = setBits + "b";
-    cmAddr.rows[0].cells[2].innerHTML = wordBits + "b";
-    cmAddr.rows[0].cells[3].innerHTML = byteBits + "b";
-     
-    // Update main memory table
-    mmAddr.rows[0].cells[0].innerHTML = blockBits + "b";
-    mmAddr.rows[0].cells[1].innerHTML = wordBits + "b";
-    mmAddr.rows[0].cells[2].innerHTML = byteBits + "b";
+function updateCMTable(row, cell, val) {
+    cmAddr.rows[row].cells[cell].innerHTML = val;
+}
+
+function updateMMTable(row, cell, val) {
+    mmAddr.rows[row].cells[cell].innerHTML = val;
 }
 
 function printCalculations() {
@@ -214,7 +226,77 @@ function buildMM() {
     }
 }
 
+/**
+ * Returns a random valid address (byte)
+ */
 function getRandomAddr() {
     let address = document.getElementById("address-input");
     address.value = Math.floor(Math.random() * (mmsize));
+}
+
+/**
+ * Checks if the input address is valid
+ */
+function isValidAddr(addr) {
+    return addr < mmsize;
+}
+
+function processAddr(addr) {
+    if (!isValidAddr(addr)) return alert("Invalid address");
+    let op = document.getElementById("operation").value;
+    binAddr = toBinary(addr);
+
+    bitsB = binAddr.substring(binAddr.length - byteBits);  
+    byte = parseInt(bitsB, 2);
+
+    bitsW = binAddr.substring(binAddr.length - (wordBits+byteBits), binAddr.length - byteBits);
+    word = parseInt(bitsW, 2);
+
+    bitsBl = binAddr.substring(0, blockBits);
+    block = parseInt(bitsBl, 2);
+
+    bitsT = binAddr.substring(0, tagBits);
+    tag = parseInt(bitsT, 2);
+
+    bitsS = binAddr.substring(tagBits, tagBits + setBits);
+    set = parseInt(bitsS, 2);
+
+    // Update CM address table with binary address
+    updateCMTable(0, 0, bitsT);
+    updateCMTable(0, 1, bitsS);
+    updateCMTable(0, 2, bitsW);
+    updateCMTable(0, 3, bitsB);
+
+    // // Update MM address table with binary address
+    updateMMTable(0, 0, bitsBl);
+    updateMMTable(0, 1, bitsW);
+    updateMMTable(0, 2, bitsB);
+
+    printSimStatus("The address <b>" + addr + "</b>" + 
+        " is converted to binary <b>" + binAddr + 
+        "</b> and separated into corresponding bits within the address."
+    );
+
+    if (op === "ld") read();
+    else write();
+}
+
+function read() {
+    let directory = document.getElementById("directory").tBodies[0];
+    // Find the line
+    let line = directoyr.rows[set]
+    // let row = directory.rows[setBits];
+}
+
+function write () {
+    console.log("Writing...");
+}
+
+function toBinary(addr) {
+    return ("0".repeat(addrBits)+addr.toString(2)).slice(-addrBits);
+}
+
+function printSimStatus(msg, color) {
+    document.getElementById("simMsg").innerHTML = msg;
+    document.getElementById("simMsgWrapper").style.backgroundColor = "rgba(63, 133, 244, .2)";
 }

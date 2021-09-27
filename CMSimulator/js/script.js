@@ -9,10 +9,18 @@ bitsByte = bitsWord = bitsBlock = bitsTag = bitsLine = bitsSet = 0;
 var bitsB, bitsW, bitsBl, BitsT, bitsS;
 // Decimal values of address bits
 var byte, word, block, tag, set;
+// Operation
+var op
+var blockData = [];
 
 // Address tables
 cmAddr = document.getElementById("CMAddr").tBodies[0];
 mmAddr = document.getElementById("MMAddr").tBodies[0];
+
+// Cache memory and main memory tables
+var directory = document.getElementById("directory").tBodies[0];
+var content = document.getElementById("content");
+var mm = document.getElementById("mm").tBodies[0];
 
 // Enable "number of sets" field only in set-associative option
 var ppolicies = document.forms["setupForm"].elements["ppolicy"];
@@ -127,11 +135,11 @@ function calcNWay(ppolicy, cmsize, wperb, wsize) {
             break;
         case "fullyAssociative":
             // same as number of lines
-            nway = cmsize / (wperb * wsize);
+            nway = parseInt(cmsize / (wperb * wsize));
             break;
         case "setAssociative":
             // the input introduced by the user
-            nway = window.nwayInput.value;
+            nway = parseInt(window.nwayInput.value);
             break;
     }
     return nway;
@@ -184,12 +192,10 @@ function printCalculations() {
     addrBits + " - (" + wordBits + " + " + byteBits + ") = " + blockBits + " bits.<br />" +
     "Log₂(" + lines + ") = " + lineBits + " bits.<br />" +
     "Log₂(" + lines + " / " + nway + ") = " + setBits + " bits.<br />" +
-    blockBits +  " - " + setBits + " = " + tagBits + " bits."
+    blockBits +  " - " + setBits + " = " + tagBits + " bits.";
 }
 
 function buildCM() {
-    let directory = document.getElementById("directory").tBodies[0];
-    let content = document.getElementById("content");
     let row;
 
     // Empty in case there was previous data
@@ -197,20 +203,22 @@ function buildCM() {
     content.tBodies[0].innerHTML = "";
 
     for (i = 0; i < lines; i++) {
+        
         // Directory
         row = directory.insertRow();
-        row.insertCell().innerHTML = i;
-        for (j = 0; j < 3; j++) row.insertCell().innerHTML = 0;
-        row.insertCell(3).innerHTML = "-";
+        row.insertCell().innerHTML = Math.floor(i / nway);
+        for (j = 0; j < 2; j++) row.insertCell().innerHTML = 0;
+        row.insertCell().innerHTML = "-";
+        row.insertCell().innerHTML = toBinary(i % nway, Math.log2(nway));
+
         // // Content
-        content.tHead.rows[0].cells[0].colSpan = lines;
+        content.tHead.rows[0].cells[0].colSpan = wperb;
         row = content.tBodies[0].insertRow();
         for (k = 0; k < lines; k++) row.insertCell().innerHTML = "-";
     }
 }
 
 function buildMM() {
-    let mm = document.getElementById("mm").tBodies[0];
     let blSize = wperb * wsize;
     let row;
 
@@ -221,7 +229,7 @@ function buildMM() {
     for (i = 0; i < mmsize / blSize; i++) {
         row = mm.insertRow();
         for (j = 0; j < wperb; j++) {
-            row.insertCell().innerHTML = "B:" + i + " W:" + j;
+            row.insertCell().innerHTML = "B" + i + "W" + j;
         }
     }
 }
@@ -243,15 +251,15 @@ function isValidAddr(addr) {
 
 function processAddr(addr) {
     if (!isValidAddr(addr)) return alert("Invalid address");
-    let op = document.getElementById("operation").value;
-    binAddr = toBinary(addr);
+    op = document.getElementById("operation").value;
+    binAddr = toBinary(addr, addrBits);
 
     bitsB = binAddr.substring(binAddr.length - byteBits);  
     byte = parseInt(bitsB, 2);
 
     bitsW = binAddr.substring(binAddr.length - (wordBits+byteBits), binAddr.length - byteBits);
     word = parseInt(bitsW, 2);
-
+    
     bitsBl = binAddr.substring(0, blockBits);
     block = parseInt(bitsBl, 2);
 
@@ -259,7 +267,11 @@ function processAddr(addr) {
     tag = parseInt(bitsT, 2);
 
     bitsS = binAddr.substring(tagBits, tagBits + setBits);
-    set = parseInt(bitsS, 2);
+    if (bitsS == "") set = 0; // fully associative has not bits for set
+    else set = parseInt(bitsS, 2);
+
+    // Obtain block data
+    for (i = 0; i < wperb; i++) blockData[i] = mm.rows[block].cells[i].innerHTML;
 
     // Update CM address table with binary address
     updateCMTable(0, 0, bitsT);
@@ -277,26 +289,89 @@ function processAddr(addr) {
         "</b> and separated into corresponding bits within the address."
     );
 
-    if (op === "ld") read();
-    else write();
-}
-
-function read() {
+    // Find corresponding set in cache
     let directory = document.getElementById("directory").tBodies[0];
-    // Find the line
-    let line = directoyr.rows[set]
-    // let row = directory.rows[setBits];
+    
+    // Find line into set
+    let hit = false;
+    let line;
+    let busyBit;
+    let oldTag;
+    for (i = 0; i < nway; i++) {
+        line = set+i;
+        oldTag = directory.rows[line].cells[3].innerHTML;
+        busyBit = directory.rows[line].cells[1].innerHTML;
+
+        if (busyBit == 1 && oldTag == toBinary(tag)) {
+            hit = true;
+            break;
+        }
+    }
+
+    if (hit) {
+        if (op == "ld") { // read
+            // If LRU, update LRU
+            // Print status
+            printSimStatus("It is a <b>hit</b>, so data is fetched from cache.");
+        } else { // write
+
+        }
+        
+    } else { // miss
+        // Replace the block
+        if (op == "ld") {
+
+            if (rpolicy == "fifo" || rpolicy == "lru") { // FIFO or LRU
+                updateReplBits();
+            }
+            // Update busy bit if it is 0
+        }
+
+        // for (i = 0; i < wperb; i++) content.tBodies[0].rows[line].cells[i].innerHTML = blockData[i];
+        // directory.rows[line].cells[1].innerHTML = 1;
+        // directory.rows[line].cells[3].innerHTML = toBinary(tag, tagBits);
+    }
+}
+function read() {
+    console.log("Reading...");
 }
 
 function write () {
     console.log("Writing...");
 }
 
-function toBinary(addr) {
-    return ("0".repeat(addrBits)+addr.toString(2)).slice(-addrBits);
+function toBinary(n, fill) {
+    return ("0".repeat(fill)+n.toString(2)).slice(-fill);
 }
 
-function printSimStatus(msg, color) {
+function updateReplBits() {
+    // Find the oldest line (LRU or FIFO is same on miss)
+    let oldestLine = directory.rows[set*nway];
+    let oldestLineReplBits = parseInt(oldestLine.cells[4].innerHTML);
+    for (i = 1; i < nway; i++) {
+        let currLine = directory.rows[set*nway+i];
+        let currLineReplBits = parseInt(currLine.cells[4].innerHTML);
+        // Compare oldest line bits with current line bits
+        if (currLineReplBits < oldestLineReplBits) {
+            oldestLine = currLine;
+            oldestLineReplBits = currLineReplBits;
+        }
+    }
+
+    // Update the replacement bits of updated line
+    oldestLine.cells[4].innerHTML = toBinary(nway-1, Math.log2(nway));
+    // Reduce replacement bits for the rest of lines within the set
+    for (i = 0; i < nway; i++) {
+        currLine = set*nway+i;
+        if (set*nway+i != oldestLine.rowIndex-1) {
+            currLine = directory.rows[currLine];
+            currLineReplBits = parseInt(currLine.cells[4].innerHTML, 2);
+            currLine.cells[4].innerHTML = toBinary(currLineReplBits-1, Math.log2(nway));
+        }
+    }
+}
+
+function printSimStatus(msg, bgColor) {
     document.getElementById("simMsg").innerHTML = msg;
-    document.getElementById("simMsgWrapper").style.backgroundColor = "rgba(63, 133, 244, .2)";
+    document.getElementById("simMsgWrapper").style.backgroundColor = bgColor;
 }

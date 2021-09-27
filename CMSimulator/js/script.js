@@ -317,40 +317,73 @@ function processAddr(addr) {
         }
     }
 
-    if (hit) {
+    if (hit) { // hit
+        let hitLine = directory.rows[line];
         if (op == "ld") { // read
-            // If LRU, update LRU
-            if (rpolicy == "lru") {
-                let hitLine = directory.rows[line];
-                updateReplBits(hitLine)
-            }
-            // Print status
+            // Message("Line has been read");
             printSimStatus("It is a <b>hit</b>, so data is fetched from cache.");
         } else { // write
-            console.log("Now we're writing on hit");
+            // Message("Content has been updated");
+            if (wpolicy == "writeThrough") {
+                // Message("Main memory has been updated")
+                console.log("Updating MM block...");
+            } else { //  Write back
+                // Change dirty bit to 1
+                hitLine.cells[2].innerHTML = 1;
+                // Message("Dirty bit has been set to 1")
+            }
+
+        }
+
+        // If LRU, update LRU
+        if (rpolicy == "lru") {
+            // Message("Update LRU")
+            updateReplBits(hitLine)
         }
         
     } else { // miss
-        // Replace the block
-        if (op == "ld") { // reading
-            let line;
-            if (rpolicy == "fifo" || rpolicy == "lru") { // FIFO or LRU
-                line = getOldestLine();
-                // Update the replacement bits
-                updateReplBits(line);
-            } else { // random
-                let randLine = Math.floor(Math.random() * (set*nway+nway - set*nway) + set*nway);
-                line = directory.rows[randLine];
-            }
-            // Tansfer the block
-            transferBlock(line, blockData);
-            // Update the tag
-            updateTag(line, tag);
-            // Update busy bit
-            if (busyBit == 0) updateBusyBit(line, 1);
-        } else { // writing
-            console.log("Now we're writing on miss");
+        let line;
+
+        // Update replacements bits in case of FIFO or LRU policies
+        if (rpolicy == "fifo" || rpolicy == "lru") {
+            line = getOldestLine();
+            // Update the replacement bits
+            updateReplBits(line);
+        } else { // random
+            let randLine = Math.floor(Math.random() * (set*nway+nway - set*nway) + set*nway);
+            line = directory.rows[randLine];
         }
+
+        // Tansfer the block
+        transferBlock(line, blockData);
+        
+        // Update the tag
+        updateTag(line, tag);
+
+        // Update busy bit
+        if (busyBit == 0) updateBusyBit(line, 1);
+        
+        if (op == "ld") { // reading
+            if (line.cells[2].innerHTML == 1) {
+                // Message("Dirty bit is 1, so block is transferred to MM")
+            }
+        } else { // writing
+            // Check writing policy
+            if (wpolicy == "writeThrough") {
+                if (wrAlloc == "writeOnAround") {
+                    // Message update memory block
+                }
+            }  else { // Write back
+                if (wrAlloc == "writeOnAround") {
+                    // Message update memory block
+                } else {
+                    if (line.cells[2].innerHTML == 1) {
+                        // Message("Dirty bit is 1, so block is transferred to MM")
+                    }
+                }
+            }
+        }
+
     }
 }
 

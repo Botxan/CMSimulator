@@ -297,21 +297,25 @@ function processAddr(addr) {
     let line;
     let busyBit;
     let oldTag;
-    let oldestLine;
     for (i = 0; i < nway; i++) {
-        line = set+i;
+        line = set*nway+i;
         oldTag = directory.rows[line].cells[3].innerHTML;
         busyBit = directory.rows[line].cells[1].innerHTML;
-
-        if (busyBit == 1 && oldTag == toBinary(tag)) {
+        if (busyBit == 1 && oldTag == toBinary(tag, tagBits)) {
+            console.log("Its a hit");
             hit = true;
             break;
         }
     }
 
     if (hit) {
+        console.log("HIT!");
         if (op == "ld") { // read
             // If LRU, update LRU
+            if (rpolicy == "lru") {
+                let hitLine = directory.rows[line];
+                updateReplBits(hitLine)
+            }
             // Print status
             printSimStatus("It is a <b>hit</b>, so data is fetched from cache.");
         } else { // write
@@ -328,7 +332,6 @@ function processAddr(addr) {
                 updateReplBits(line);
             } else { // random
                 let randLine = Math.floor(Math.random() * (set*nway+nway - set*nway) + set*nway);
-                console.log("The rand line: " + randLine);
                 line = directory.rows[randLine];
             }
             // Tansfer the block
@@ -336,7 +339,7 @@ function processAddr(addr) {
             // Update the tag
             updateTag(line, tag);
             // Update busy bit
-            updateBusyBit(line, 1);
+            if (busyBit == 0) updateBusyBit(line, 1);
         }
     }
 }
@@ -346,17 +349,23 @@ function toBinary(n, fill) {
 }
 
 function updateReplBits(line) {
-    // Update the replacement bits of updated line
-    line.cells[4].innerHTML = toBinary(nway-1, Math.log2(nway));
-    // Reduce replacement bits for the rest of lines within the set
+    console.log("updateReplBits called!");
+    // Reduce replacement bits for the rest of lines with higher repl bits
     for (i = 0; i < nway; i++) {
-        currLine = set*nway+i;
         if (set*nway+i != line.rowIndex-1) {
+            currLine = set*nway+i;
+            console.log("Updating line: " + currLine);
             currLine = directory.rows[currLine];
             currLineReplBits = parseInt(currLine.cells[4].innerHTML, 2);
-            currLine.cells[4].innerHTML = toBinary(currLineReplBits-1, Math.log2(nway));
+            // Check if replacement bits are higher than current line
+            if (currLineReplBits > parseInt(line.cells[4].innerHTML)) {
+                currLine.cells[4].innerHTML = toBinary(currLineReplBits-1, Math.log2(nway));
+            }
         }
     }
+
+    // Update the replacement bits of updated line
+    line.cells[4].innerHTML = toBinary(nway-1, Math.log2(nway));
 }
 
 function updateTag(line, tag) {
@@ -384,8 +393,6 @@ function getOldestLine() {
 }
 
 function transferBlock(line, block) {
-    console.log("the line: ", line.rowIndex-1);
-    console.log("the block: ", block[1]);
     for (i = 0; i < wperb; i++) content.rows[line.rowIndex].cells[i].innerHTML = block[i];
 }
 

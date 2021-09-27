@@ -297,6 +297,7 @@ function processAddr(addr) {
     let line;
     let busyBit;
     let oldTag;
+    let oldestLine;
     for (i = 0; i < nway; i++) {
         line = set+i;
         oldTag = directory.rows[line].cells[3].innerHTML;
@@ -314,37 +315,59 @@ function processAddr(addr) {
             // Print status
             printSimStatus("It is a <b>hit</b>, so data is fetched from cache.");
         } else { // write
-
+            // stuff that I'm currently studying so idk how to implement it
         }
         
     } else { // miss
         // Replace the block
         if (op == "ld") {
-
+            let line;
             if (rpolicy == "fifo" || rpolicy == "lru") { // FIFO or LRU
-                updateReplBits();
+                line = getOldestLine();
+                // Update the replacement bits
+                updateReplBits(line);
+            } else { // random
+                let randLine = Math.floor(Math.random() * (set*nway+nway - set*nway) + set*nway);
+                console.log("The rand line: " + randLine);
+                line = directory.rows[randLine];
             }
-            // Update busy bit if it is 0
+            // Tansfer the block
+            transferBlock(line, blockData);
+            // Update the tag
+            updateTag(line, tag);
+            // Update busy bit
+            updateBusyBit(line, 1);
         }
-
-        // for (i = 0; i < wperb; i++) content.tBodies[0].rows[line].cells[i].innerHTML = blockData[i];
-        // directory.rows[line].cells[1].innerHTML = 1;
-        // directory.rows[line].cells[3].innerHTML = toBinary(tag, tagBits);
     }
-}
-function read() {
-    console.log("Reading...");
-}
-
-function write () {
-    console.log("Writing...");
 }
 
 function toBinary(n, fill) {
     return ("0".repeat(fill)+n.toString(2)).slice(-fill);
 }
 
-function updateReplBits() {
+function updateReplBits(line) {
+    // Update the replacement bits of updated line
+    line.cells[4].innerHTML = toBinary(nway-1, Math.log2(nway));
+    // Reduce replacement bits for the rest of lines within the set
+    for (i = 0; i < nway; i++) {
+        currLine = set*nway+i;
+        if (set*nway+i != line.rowIndex-1) {
+            currLine = directory.rows[currLine];
+            currLineReplBits = parseInt(currLine.cells[4].innerHTML, 2);
+            currLine.cells[4].innerHTML = toBinary(currLineReplBits-1, Math.log2(nway));
+        }
+    }
+}
+
+function updateTag(line, tag) {
+    line.cells[3].innerHTML = toBinary(tag, tagBits);
+}
+
+function updateBusyBit(line, bit)  {
+    line.cells[1].innerHTML = bit;
+}
+
+function getOldestLine() {
     // Find the oldest line (LRU or FIFO is same on miss)
     let oldestLine = directory.rows[set*nway];
     let oldestLineReplBits = parseInt(oldestLine.cells[4].innerHTML);
@@ -357,18 +380,13 @@ function updateReplBits() {
             oldestLineReplBits = currLineReplBits;
         }
     }
+    return oldestLine;
+}
 
-    // Update the replacement bits of updated line
-    oldestLine.cells[4].innerHTML = toBinary(nway-1, Math.log2(nway));
-    // Reduce replacement bits for the rest of lines within the set
-    for (i = 0; i < nway; i++) {
-        currLine = set*nway+i;
-        if (set*nway+i != oldestLine.rowIndex-1) {
-            currLine = directory.rows[currLine];
-            currLineReplBits = parseInt(currLine.cells[4].innerHTML, 2);
-            currLine.cells[4].innerHTML = toBinary(currLineReplBits-1, Math.log2(nway));
-        }
-    }
+function transferBlock(line, block) {
+    console.log("the line: ", line.rowIndex-1);
+    console.log("the block: ", block[1]);
+    for (i = 0; i < wperb; i++) content.rows[line.rowIndex].cells[i].innerHTML = block[i];
 }
 
 function printSimStatus(msg, bgColor) {

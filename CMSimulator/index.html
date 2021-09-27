@@ -26,7 +26,7 @@
                     <h1>CMSimulator</h1>
                     <form name="setupForm" action="" class="flex-grow-1 d-flex flex-column" onsubmit="return validateSetupForm()">
                         <div class="sizes mb-2">  
-                            <h6 class="mb-3">Sizes</h6> 
+                            <h6 class="mb-3">Sizes and time costs</h6> 
                             <!-- CM -->          
                             <div class="md-form input-group">
                                 <div class="input-group-prepend">
@@ -36,7 +36,7 @@
                                 <div class="input-group-append">
                                     <span class="input-group-text md-addon">B</span>
                                 </div>
-                                <input type="number" id="cmAccessTime" aria-label="Cache memory access time" class="form-control" placeholder="cycles" value="2">
+                                <input type="number" id="tCM" aria-label="Cache memory access time" class="form-control" placeholder="cycles" value="2">
                                 <div class="input-group-append">
                                     <span class="input-group-text md-addon">cycles</span>
                                 </div>
@@ -52,7 +52,7 @@
                                 <div class="input-group-append">
                                     <span class="input-group-text md-addon">B</span>
                                 </div>
-                                <input type="number" id="mmAccessTime" aria-label="Main memory access time" class="form-control" placeholder="cycles" value="21">
+                                <input type="number" id="tMM" aria-label="Main memory access time" class="form-control" placeholder="cycles" value="21">
                                 <div class="input-group-append">
                                     <span class="input-group-text md-addon">cycles</span>
                                 </div>
@@ -70,6 +70,17 @@
                                 <input type="number" id="wsize" aria-label="Bytes per word" class="form-control" placeholder="Bytes/Word" value="4">
                                 <div class="input-group-append">
                                     <span class="input-group-text md-addon">bytes</span>
+                                </div>
+                            </div>
+
+                            <!-- Interleaving buffer access time -->
+                            <div class="md-form input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text md-addon">Buffer access time</span>
+                                </div>
+                                <input type="number" id="tBuff" aria-label="Interleaving buffer access time" class="form-control" placeholder="cycles" value="1">
+                                <div class="input-group-append">
+                                    <span class="input-group-text md-addon">cycles</span>
                                 </div>
                             </div>
                         </div>
@@ -97,9 +108,9 @@
                                 <div class="input-group-prepend">
                                   <span class="input-group-text md-addon" name="nway-span">N-way</span>
                                 </div>
-                                <input type="text" name="nway" aria-label="nway" class="form-control" disabled>
+                                <input type="number" name="nway" aria-label="nway" class="form-control" placeholder="2ⁿ lines" disabled>
                                 <div class="input-group-append">
-                                    <span class="input-group-text md-addon">line/set</span>
+                                    <span class="input-group-text md-addon">lines/set</span>
                                 </div>
                             </div>
                         </div>
@@ -109,12 +120,23 @@
                             <h6 class="mb-3">Writing policy</h6>
                             <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
                                 <label class="btn btn-primary active">
-                                    <input type="radio" name="wpolicy" checked autocomplete="off" value="writeThrough">
+                                    <input type="radio" name="wpolicy" autocomplete="off" value="writeThrough">
                                     Write-through
                                 </label>
                                 <label class="btn btn-primary">
-                                    <input type="radio" name="wpolicy" autocomplete="off" value="writeBack">
+                                    <input type="radio" name="wpolicy" autocomplete="off" value="writeBack" checked>
                                     Write-back
+                                </label>
+                            </div>
+
+                            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                                <label class="btn btn-primary active">
+                                    <input type="radio" name="wrAlloc" autocomplete="off" value="writeOnAllocate" checked>
+                                    Write on allocate
+                                </label>
+                                <label class="btn btn-primary">
+                                    <input type="radio" name="wrAlloc" autocomplete="off" value="writeOnAround">
+                                    Write around
                                 </label>
                             </div>
                         </div>
@@ -216,8 +238,8 @@
                         <input id="address-input" name="address-input" type="number" class="form-control" placeholder="Introduce an address (byte)" aria-label="Instruction input">
                         <div class="input-group-append">
                             <select id="operation" class="custom-select">
-                                <option value="ld" selected>Ld</option>
-                                <option value="st">St</option>
+                                <option value="ld">Ld</option>
+                                <option value="st" selected>St</option>
                             </select>
                         </div>
                         <div class="input-group-append">

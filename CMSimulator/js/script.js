@@ -1,5 +1,5 @@
 // Form values
-var cmsize, mmsize, wsize, wperb, nwayInput, nway, ppolicy, wpolicy, rpolicy, lines;
+var cmsize, tCM, mmsize, tMM, tBuff, wsize, wperb, nwayInput, nway, ppolicy, wpolicy, wrAlloc, rpolicy, lines;
 
 // Address structure bits
 var addrBits, byteBits, wordBits, blockBits, tagBits, lineBits, setBits;
@@ -41,15 +41,22 @@ for (ppolicy in ppolicies) {
 function validateSetupForm() {
     let err = "";
     let valid = true;
+
+    // Get form fields
     mmsize = parseInt(document.forms["setupForm"]["mmsize"].value);
+    tCM = parseInt(document.forms["setupForm"]["tCM"].value);
     cmsize = parseInt(document.forms["setupForm"]["cmsize"].value);
+    tMM = parseInt(document.forms["setupForm"]["tMM"].value);
+    tBuff = parseInt(document.forms["setupForm"]["tBuff"].value);
     wsize = parseInt(document.forms["setupForm"]["wsize"].value);
     wperb = parseInt(document.forms["setupForm"]["wperb"].value);
     nwayInput = document.forms["setupForm"]["nway"];
     ppolicy = document.querySelector('input[name="ppolicy"]:checked').value;
     wpolicy = document.querySelector('input[name="wpolicy"]:checked').value;
+    wrAlloc = document.querySelector('input[name="wrAlloc"]:checked').value;
     rpolicy = document.querySelector('input[name="rpolicy"]:checked').value;
 
+    // Validate form
     if (mmsize % 2 != 0 || mmsize == undefined) {
         err += "The main memory size has to be power of 2.\n";
         valid = false;
@@ -111,10 +118,13 @@ function validateSetupForm() {
         buildMM();
     } else alert(err);
 
-    // console.log("Form values:\n" + "Main memory size: " + mmsize + ".\nCache memory size: " + cmsize
-    //     + ".\nWord size: " + wsize + ".\nWords per block: " + wperb + ".\nN-way: " + nway
-    //     + ".\nPlacement policy: " + ppolicy + ".\nWriting policy: " + wpolicy + ".\nWriting policy: " + rpolicy
-    // );
+    console.log("Form values:\n" + "Cache memory size: " + cmsize + ".\nCache memory access time; " + tCM
+        + ".\nMain memory size: " + mmsize + ".\nMain memory access time: " + tMM
+        + ".\nInterleaving buffer access time: " + tBuff + ".\nWord size: " + wsize
+        + ".\nWords per block: " + wperb + ".\nN-way: " + nway + ".\nPlacement policy: "+ ppolicy
+        + ".\nWriting policy: " + wpolicy + ".\nWriting allocation: " + wrAlloc
+        + ".\nReplacement policy: " + rpolicy + "."
+    );
     return false;
 }
 
@@ -302,14 +312,12 @@ function processAddr(addr) {
         oldTag = directory.rows[line].cells[3].innerHTML;
         busyBit = directory.rows[line].cells[1].innerHTML;
         if (busyBit == 1 && oldTag == toBinary(tag, tagBits)) {
-            console.log("Its a hit");
             hit = true;
             break;
         }
     }
 
     if (hit) {
-        console.log("HIT!");
         if (op == "ld") { // read
             // If LRU, update LRU
             if (rpolicy == "lru") {
@@ -319,12 +327,12 @@ function processAddr(addr) {
             // Print status
             printSimStatus("It is a <b>hit</b>, so data is fetched from cache.");
         } else { // write
-            // stuff that I'm currently studying so idk how to implement it
+            console.log("Now we're writing on hit");
         }
         
     } else { // miss
         // Replace the block
-        if (op == "ld") {
+        if (op == "ld") { // reading
             let line;
             if (rpolicy == "fifo" || rpolicy == "lru") { // FIFO or LRU
                 line = getOldestLine();
@@ -340,6 +348,8 @@ function processAddr(addr) {
             updateTag(line, tag);
             // Update busy bit
             if (busyBit == 0) updateBusyBit(line, 1);
+        } else { // writing
+            console.log("Now we're writing on miss");
         }
     }
 }
@@ -349,12 +359,10 @@ function toBinary(n, fill) {
 }
 
 function updateReplBits(line) {
-    console.log("updateReplBits called!");
     // Reduce replacement bits for the rest of lines with higher repl bits
     for (i = 0; i < nway; i++) {
         if (set*nway+i != line.rowIndex-1) {
             currLine = set*nway+i;
-            console.log("Updating line: " + currLine);
             currLine = directory.rows[currLine];
             currLineReplBits = parseInt(currLine.cells[4].innerHTML, 2);
             // Check if replacement bits are higher than current line

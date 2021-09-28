@@ -5,7 +5,7 @@ var cmsize, tCM, mmsize, tMM, tBuff, wsize, wperb, nwayInput, nway, ppolicy, wpo
 var addrBits, byteBits, wordBits, blockBits, tagBits, lineBits, setBits;
 bitsByte = bitsWord = bitsBlock = bitsTag = bitsLine = bitsSet = 0;
 
-var addr, hit, line, busyBit;
+var addr, hit, line, busyBit, dirtyBit;
 
 // Bits of specific address
 var bitsB, bitsW, bitsBl, BitsT, bitsS;
@@ -300,6 +300,10 @@ function highlightSet(color) {
     }
 }
 
+function highlightLine(line, color) {
+    for (i = 0; i < 5; i++) line.cells[i].style.backgroundColor = color;
+}
+
 function highlightBusyBit(color) {
     for (i = 0; i < nway; i++) {
         let line = set*nway+i;
@@ -341,11 +345,9 @@ function removeSetHighlight() {
     }
 }
 
-function removeContentHighlight() {
-    for (i = 0; i < wperb; i++) {
-        let line = set*nway+i;
-        content.tBodies[0].rows[line].cells[i].style.backgroundColor = "#fff";
-    }
+function removeContentHighlight(line) {
+    console.log("The fucking line is: ", line);
+    for (i = 0; i < wperb; i++) content.tBodies[0].rows[line.rowIndex].cells[i].style.backgroundColor = "#fff";
 }
 
 function removeMMBlockHighlight() {
@@ -419,14 +421,16 @@ function step() {
     // Go to next step
     s++;
     let ins = document.getElementById("operation").value;
-
-    if (ins == "ld") loadStep();
-    else storeStep();
+    
+    if (s > 3) {
+        if (ins == "ld") loadStep();
+        else storeStep();
+    } generalStep();
 }
 
-// Steps to follow in case of load (read) instruction
-function loadStep() {
-    switch (s) {
+// Steps to follow in any case
+function generalStep() {
+    switch(s) {
         case 1: // Read address and separate and split it in corresponding bits
             processAddr();
             printSimStatus("The address <b>" + addr + "</b>" + 
@@ -447,16 +451,28 @@ function loadStep() {
             checkHit();
             if (hit) {
                 printSimStatus("A line with busy bit to 1 and matching tag has been found, so it is a cache <b>hit</b>.", "rgba(88, 214, 141, .5)");
+                highlightLine(line, "rgba(88, 214, 141, .5)");
             } else {
                 printSimStatus("Since there is not a line with the busy bit to 1 and same tag, it is a cache <b>miss</b>.", "rgba(236, 112, 99, .5)");
+                highlightSet("rgba(236, 112, 99, .5)")
+                // get line depending on replacement policy
+                if (rpolicy == "no") { // Update random line
+                    let randLine = Math.floor(Math.random() * (set*nway+nway - set*nway) + set*nway);
+                    line = directory.rows[randLine];
+                } else line = getOldestLine();
             }
             break;
+    }
+}
 
+// Steps to follow in case of load (read) instruction
+function loadStep() {
+    switch (s) {
         case 4: // hit => Fetch block. Miss => if dirty == 1 transfer block CM > MM
+            removeContentHighlight(line);
             if (hit) {
                 printSimStatus("The block is fetched from cache memory.", "#fff");
             } else {
-                line = getOldestLine();
                 // Check dirty bit for next step;
                 if (line.cells[2].innerHTML == 0) return step();
                 printSimStatus("Dirty bit is <b>1</b>, so the block is transfered from cache memory to main memory.");
@@ -466,10 +482,6 @@ function loadStep() {
         case 5: // (miss) Block transfer MM > CM
             if (hit) return step();
             else {
-                if (rpolicy == "no") { // Update random line
-                    let randLine = Math.floor(Math.random() * (set*nway+nway - set*nway) + set*nway);
-                    line = directory.rows[randLine];
-                } // else, line is already the oldest (updated in case 5)
                 printSimStatus("The block is translated from main memory to cache memory.");
                 // Transfer block MM > CM
                 transferBlock(line, blockData);
@@ -499,54 +511,59 @@ function loadStep() {
 // Steps to follow in case of store (write) instruction
 function storeStep() {
     switch(s) {
-        case 1: // Read address and separate and split it in corresponding bits
-            processAddr();
-            printSimStatus("The address <b>" + addr + "</b>" + 
-            " is converted to binary <b>" + binAddr + 
-            "</b> and separated into corresponding bits within the address.");
-            highlightMMBlock("rgba(93, 173, 226, .5)");
-            break;
-
-        case 2: // Compare busy bit and tag
-            printSimStatus("For every line, check if busy bit is 1 and tags are equal.");    
-            removeMMBlockHighlight();       
-            highlightSet("#F9E79F");
-            highlightBusyBit("#F1C40F");
-            highlightTag("#F1C40F");
-            break;
-
-        case 3: // Resolve hit or miss
-            checkHit();
+        case 4:
             if (hit) {
-                printSimStatus("A line with busy bit to 1 and matching tag has been found, so it is a cache <b>hit</b>.", "rgba(88, 214, 141, .5)");
-            } else {
-                printSimStatus("Since there is not a line with the busy bit to 1 and same tag, it is a cache <b>miss</b>.", "rgba(236, 112, 99, .5)");
+                if (wpolicy == "writeBack") {
+                    printSimStatus("Write policy is write back, so dirty bit is set to 1.");
+                    updateDirtyBit(line, 1);
+                } else { // write through
+                    printSimStatus("Block in memory is updated");
+                }
+            } else { // write around case
+                if (wrAlloc == "writeAround") {
+                   printSimStatus("The write policy is <b>" + wpolicy == "writeThrough" ? "write through" : "write back" + "</b> and "
+                   +  "<b>write on allocate</b>, so the block is going to be updated just in main memory.");
+                } else return step();
             }
             break;
-        case 4:
-            console.log("This is the mega line: ", line);
-            break;
+
         case 5:
-            if (hit) {
-                if (wpolicy = "writeThrough") {
-                    printSimStatus("Since write policy is <b>write-through</b>, both <b>content and memory block will be updated</b>.", "rgba(93, 173, 226, .5)");
-                    highlightContent("rgba(93, 173, 226, .5)");
-                    highlightMMBlock("rgba(93, 173, 226, .5)");
-                } else {
-                    printSimStatus("Since write policy is <b>write-through</b>, the dirty bit gets updated to <b>1</b> and <b>content is updated</b>");
-                    highlightContent("rgba(93, 173, 226, .5)");
-                    highLightDirtyBit("rgba(93, 173, 226, .5)");
-                }
-            } else {
-                if (wpolicy = "writeThrough") {
-                    if (wrAlloc == "writeOnAllocate") {
-                        printSimStatus("The write policy is <b>write through</b> with <b>write on allocate</b>, so the block is going to be updated just in the main memory");
-                    }
-                }
+            if (hit) return step();
+            else {
+                console.log("policy: " + wpolicy + " " + wrAlloc);
+                if (wpolicy == "writeBack" && wrAlloc == "writeOnAllocate") {
+                    if (checkDirtyBit(line) == 1) printSimStatus("The write policy is <b>write back</b> and <b>write on allocate</b>. The dirty bit is equal to 1, so the block is transferred from cache memory to main memory.");
+                    else return step(); // write around with write on allocate
+                } else endOfSimulation();
             }
             break;
         case 6:
+            if (hit) return step();
+            else {
+                printSimStatus("The block is tranfered from main memory to cache memory.");
+                // Transfer block MM > CM
+                transferBlock(line, blockData);
+                // Update the tag
+                updateTag(line, tag);
+                // Change dirty bit if it set to 1
+                if (checkDirtyBit(line) == 1) updateDirtyBit(line, 0);
+                // Update busy bit if it is 0
+                if (busyBit == 0) updateBusyBit(line, 1);
+            }
             break;
+        case 7: // Apply replacement policy
+            if (ppolicy == "directMap") return step();
+            // If hit and lru or miss and lru|fifo => change replacement bits
+            let replace = (hit && rpolicy == "lru") || (!hit && (rpolicy == "lru" | rpolicy == "fifo")) ? true : false;
+            if (replace) {
+                hightlightReplacementBits("#AF7AC5", "#D7BDE2");
+                updateReplBits(line);
+                printSimStatus("Replacement bits are updated according to replacement policy <b>" + rpolicy + "</b>.");
+            } else return step();
+            break;
+        case 8:
+            endOfSimulation();
+
     }
 }
 
@@ -554,7 +571,7 @@ function endOfSimulation() {
     printSimStatus("End of the operation. Submit another address to continue.");
     s = 0;
     removeSetHighlight();
-    removeContentHighlight();
+    removeContentHighlight(line);
     removeMMBlockHighlight();
 }
 
@@ -586,6 +603,14 @@ function updateTag(line, tag) {
 
 function updateBusyBit(line, bit)  {
     line.cells[1].innerHTML = bit;
+}
+
+function checkDirtyBit(line) {
+    return line.cells[2].innerHTML;
+}
+
+function updateDirtyBit(line, bit) {
+    line.cells[2].innerHTML = bit;
 }
 
 function getOldestLine() {

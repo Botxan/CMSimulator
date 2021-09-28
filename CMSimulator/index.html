@@ -135,7 +135,7 @@
                                     Write on allocate
                                 </label>
                                 <label class="btn btn-primary">
-                                    <input type="radio" name="wrAlloc" autocomplete="off" value="writeOnAround">
+                                    <input type="radio" name="wrAlloc" autocomplete="off" value="writeAround">
                                     Write around
                                 </label>
                             </div>
@@ -169,7 +169,7 @@
 
             <div class="col-md-9">
                 <!-- Card deck -->
-                <div class="card-deck addr-structures">
+                <div class="addr-structures card-deck addr-structures">
                     <!-- Cache memory address -->
                     <div class="card mb-4">
                         <div class="table-wrapper">
@@ -197,12 +197,8 @@
                     </div>
 
                     <!-- Simulator status -->
-                    <div id="calculations" class="card mb-4">
-                        <!--Card content-->
-                        <div id="simMsgWrapper" class="card-body">
-                            <!--Text-->
-                            <p id="simMsg" class="card-text">Waiting for instruction...</p>
-                        </div>
+                    <div id="simMsgWrapper" class="card mb-4 sim-msg-wrapper d-flex align-items-center justify-content-center text-center">
+                        <p id="simMsg" class="card-text simMsg">Waiting for instruction...</p>
                     </div>
 
                     <!-- Main memory address -->

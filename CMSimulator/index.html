@@ -243,7 +243,7 @@
                             </select>
                         </div>
                         <div class="input-group-append">
-                            <button class="btn btn-md btn-default m-0 px-3" type="button" onclick="processAddr(parseInt(document.getElementById('address-input').value))">Send</button>
+                            <button class="btn btn-md btn-default m-0 px-3" type="button" onclick="step()">Send</button>
                         </div>
                     </div>
                     <div class="simulator p-3 z-depth-1 d-flex flex-column">
@@ -291,7 +291,7 @@
                         <div class="d-flex flex-grow-1 align-items-end">
                             <div class="blue-gradient d-flex flex-grow-1 justify-content-center align-items-center" style="margin: auto -16px -16px -16px">
                                 <div>
-                                    <button id="next" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                                    <button id="next" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2" onclick="step()">
                                         Next
                                         <i class="fas fa-angle-right"></i>
                                     </button>

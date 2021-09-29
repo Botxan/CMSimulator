@@ -24,17 +24,21 @@ body {
   padding: 10px 0px 30px 0px;
 }
 
+.setup input[type="number"] {
+  padding: 2px !important;
+}
+
 .addr-structures th,
 .addr-structures td {
   min-width: 3px;
 }
 
-.right-section {
-  height: 98vh;
-}
-
 .table {
   text-align: center;
+}
+
+.address-input-wrapper {
+  pointer-events: none;
 }
 
 .sim-msg-wrapper {
@@ -47,6 +51,10 @@ body {
   height: 55vh;
   margin-top: 2vh;
   overflow: auto;
+}
+
+.sim-controller {
+  pointer-events: none;
 }
 
 .directory th, .directory td, .content th, .content td, .mm td {
@@ -62,7 +70,10 @@ body {
   overflow: auto;
 }
 
-.explanation, .statistics {
-  height: 16vh;
+.statistics {
   margin-top: 2vh;
+}
+
+.calc-table td{
+  min-width: 40px;
 }

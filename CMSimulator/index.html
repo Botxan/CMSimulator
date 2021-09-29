@@ -22,10 +22,10 @@
     <div class="main px-4">
         <div class="row gx-3">
             <div class="col-md-3">
-                <div class="setup p-3 z-depth-1 d-flex flex-column">
+                <div id="setup" class="setup p-3 z-depth-1 d-flex flex-column">
                     <h1>CMSimulator</h1>
-                    <form name="setupForm" action="" class="flex-grow-1 d-flex flex-column" onsubmit="return validateSetupForm()">
-                        <div class="sizes mb-2">  
+                    <form name="setupForm" action="" class="flex-grow-1 d-flex flex-column" onsubmit="return onSubmit()">
+                        <div id="sizes" class="sizes mb-2">  
                             <h6 class="mb-3">Sizes and time costs</h6> 
                             <!-- CM -->          
                             <div class="md-form input-group">
@@ -86,7 +86,7 @@
                         </div>
 
                         <!-- Placement policy -->
-                        <div class="placement-policy mt-2 mb-2">
+                        <div id="ppolicy" class="placement-policy mt-2 mb-2">
                             <h6 class="mb-3">Placement policy</h6>                            
                             <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
                                 <label class="btn btn-primary active">
@@ -116,7 +116,7 @@
                         </div>
         
                         <!-- Writing policy -->
-                        <div class="writing-policy mt-2 mb-2">
+                        <div id="wpolicy" class="wpolicy mt-2 mb-2">
                             <h6 class="mb-3">Writing policy</h6>
                             <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
                                 <label class="btn btn-primary active">
@@ -142,7 +142,7 @@
                         </div>
         
                         <!-- Replacement policy -->
-                        <div class="replacement-policy mt-2 mb-2">
+                        <div id="rpolicy" class="replacement-policy mt-2 mb-2">
                             <h6 class="mb-3">Replacement policy</h6>
                             <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
                                 <label class="btn btn-primary active">
@@ -161,7 +161,7 @@
                         </div>
 
                         <div class="d-flex flex-grow-1 align-items-end mt-2">
-                            <button type="submit" class="btn btn-default btn-lg w-100">Submit</button>
+                            <button id="submit" type="submit" class="btn btn-default btn-lg w-100" value="submit">Submit</button>
                         </div>
                     </form>
                 </div>
@@ -225,112 +225,123 @@
                         </div>
                     </div>
                 </div>
-                <div class="right-section">  
-                    <!-- Address input -->
-                    <div class="md-form input-group mb-3">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-md btn-primary m-0 px-3" type="button" onclick="getRandomAddr()">Gen. random address</button>
+               
+                <!-- Address input -->
+                <div id="addressInput" class="md-form input-group mb-3 address-input-wrapper">
+                    <div class="input-group-prepend">
+                        <button class="btn btn-md btn-primary m-0 px-3" type="button" onclick="getRandomAddr()">Gen. random address</button>
+                    </div>
+                    <input id="address-input" name="address-input" type="number" class="form-control" placeholder="Introduce an address (byte)" aria-label="Instruction input">
+                    <div class="input-group-append">
+                        <select id="operation" class="custom-select">
+                            <option value="ld">Ld</option>
+                            <option value="st" selected>St</option>
+                        </select>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-md btn-default m-0 px-3" type="button" onclick="step()">Send</button>
+                    </div>
+                </div>
+                <div class="simulator p-3 z-depth-1 d-flex flex-column">
+                    <div class="row">
+                        <div class="col-sm-7 text-center">
+                            <h6>Cache memory</h6>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="table-wrapper">
+                                        <table id="directory" class="table table-bordered table-sm directory">
+                                            <thead>
+                                                <th>set</th>
+                                                <th>busy</th>
+                                                <th>dirty</th>
+                                                <th>tag</th>
+                                                <th>repl</th>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="table wrapper">
+                                        <table id="content" class="table table-bordered table-sm content">
+                                            <thead>
+                                                <th>content</th>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <input id="address-input" name="address-input" type="number" class="form-control" placeholder="Introduce an address (byte)" aria-label="Instruction input">
-                        <div class="input-group-append">
-                            <select id="operation" class="custom-select">
-                                <option value="ld">Ld</option>
-                                <option value="st" selected>St</option>
-                            </select>
-                        </div>
-                        <div class="input-group-append">
-                            <button class="btn btn-md btn-default m-0 px-3" type="button" onclick="step()">Send</button>
+                        <div class="col-sm-5 text-center">
+                            <h6>Main memory</h6>
+                            <div class="table-wrapper">
+                                <table id="mm" class="table table-sm table-bordered mm">
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                    <div class="simulator p-3 z-depth-1 d-flex flex-column">
-                        <div class="row">
-                            <div class="col-sm-7 text-center">
-                                <h6>Cache memory</h6>
-                                <div class="row">
-                                    <div class="col-sm-4">
-                                        <div class="table-wrapper">
-                                            <table id="directory" class="table table-bordered table-sm directory">
-                                                <thead>
-                                                    <th>set</th>
-                                                    <th>busy</th>
-                                                    <th>dirty</th>
-                                                    <th>tag</th>
-                                                    <th>repl</th>
-                                                </thead>
-                                                <tbody></tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-8">
-                                        <div class="table wrapper">
-                                            <table id="content" class="table table-bordered table-sm content">
-                                                <thead>
-                                                    <th>content</th>
-                                                </thead>
-                                                <tbody>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-5 text-center">
-                                <h6>Main memory</h6>
-                                <div class="table-wrapper">
-                                    <table id="mm" class="table table-sm table-bordered mm">
-                                        <tbody>
-                                        </tbody>
-                                    </table>
-                                </div>
+                    <div class="d-flex flex-grow-1 align-items-end">
+                        <div id="simController" class="sim-controller blue-gradient d-flex flex-grow-1 justify-content-center align-items-center" style="margin: auto -16px -16px -16px">
+                            <div>
+                                <button id="next" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2" onclick="step()">
+                                    Next
+                                    <i class="fas fa-angle-right"></i>
+                                </button>
+                                <button id="fast-forward" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                                    Fast forward
+                                    <i class="fas fa-angle-double-right"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="d-flex flex-grow-1 align-items-end">
-                            <div class="blue-gradient d-flex flex-grow-1 justify-content-center align-items-center" style="margin: auto -16px -16px -16px">
-                                <div>
-                                    <button id="next" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2" onclick="step()">
-                                        Next
-                                        <i class="fas fa-angle-right"></i>
-                                    </button>
-                                    <button id="fast-forward" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2">
-                                        Fast forward
-                                        <i class="fas fa-angle-double-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
                     </div>
-                    <div class="explanation-statistics row gx-3">
-                        <div class="col-sm-8">
-                            <div class="explanation p-2 z-depth-1">
-                                <div id="calculations" class="calculations">
-                                    <h6>Calculations</h6>
-                                    <div class="row">
-                                        <div class="col-sm-6 result-identifiers">
-                                            Address length:
-                                            <br>
-                                            Byte in word:
-                                            <br>
-                                            Word in block:
-                                            <br>
-                                            Block:
-                                            <br>
-                                            Line:
-                                            <br>
-                                            Set:
-                                            <br>
-                                            Tag:
-                                        </div>
-                                        <div id="results" class="col-sm-6 results text-left">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="statistics p-3 z-depth-1">
-                                Statistics
-                            </div>
+                </div>
+
+                <!--  -->
+                <div class="statistics row gx-3">
+                    <div id="calcTableWrapper" class="calc-table-wrapper col-sm-3">
+                        <table id="calcTable" class="calc-table table table-bordered table-sm table-dark">
+                            <tbody>
+                                <tr>
+                                    <td>Address length</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Byte in word</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Word in block</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Block</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Line</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Set</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Tag</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-sm-4">
+                        Papito remolinos
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="statistics-chart p-3 z-depth-1">
+                            Statistic chart
                         </div>
                     </div>
                 </div>

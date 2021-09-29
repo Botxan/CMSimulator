@@ -9,12 +9,19 @@ var addr, hit, line, busyBit, dirtyBit;
 
 // Bits of specific address
 var bitsB, bitsW, bitsBl, BitsT, bitsS;
+
 // Decimal values of address bits
 var byte, word, block, tag, set;
+
 // Operation
 var op
 var blockData = [];
 var s = 0;
+
+// Times
+var pTime = 0;
+var tTime = 0;
+var tBt;
 
 // Address tables
 cmAddr = document.getElementById("CMAddr").tBodies[0];
@@ -36,6 +43,36 @@ for (ppolicy in ppolicies) {
             nwayInput.disabled = true;
         }
     }
+}
+
+function onSubmit() {
+    submitBtn = document.getElementById("submit");
+    if(submitBtn.value == "submit") {
+        validateSetupForm();
+        submitBtn.innerHTML = "reset";
+        submitBtn.value = "reset";
+        submitBtn.classList.replace("btn-default", "btn-danger");
+        disableForm();
+    } else {
+        reset();
+        submitBtn.innerHTML = "submit";
+        submitBtn.value = "submit";
+        submitBtn.classList.replace("btn-danger", "btn-default");
+    }
+    return false;
+}
+
+function disableForm() {
+    document.getElementById("setup").style.backgroundColor = "#dddddd";
+    document.getElementById("sizes").style.pointerEvents = "none";
+    document.getElementById("ppolicy").style.pointerEvents = "none";
+    document.getElementById("wpolicy").style.pointerEvents = "none";
+    document.getElementById("rpolicy").style.pointerEvents = "none";   
+}
+
+/** Resets the app */
+function reset() {
+    location.reload();
 }
 
 /**
@@ -95,6 +132,9 @@ function validateSetupForm() {
         nway = calcNWay(ppolicy, cmsize, wperb, wsize);
         nwayInput.value = nway;
 
+        // Calculate time to transfer a block
+        tBt = tMM + (wperb - 1) * tBuff;
+
         // Calculate address bits for cache memory and main memory address structure
         calcAddrBits(mmsize, cmsize, wperb, wsize);
 
@@ -110,9 +150,10 @@ function validateSetupForm() {
         updateMMTable(0, 2, byteBits + "b");
 
         printCalculations();
-        document.getElementById("address-input").focus();
         buildCM();
         buildMM();
+        document.getElementById("address-input").focus();
+        document.getElementById("addressInput").style.pointerEvents = "auto";
     } else alert(err);
 
     // console.log("Form values:\n" + "Cache memory size: " + cmsize + ".\nCache memory access time; " + tCM
@@ -122,7 +163,6 @@ function validateSetupForm() {
     //     + ".\nWriting policy: " + wpolicy + ".\nWriting allocation: " + wrAlloc
     //     + ".\nReplacement policy: " + rpolicy + "."
     // );
-    return false;
 }
 
 /**
@@ -192,14 +232,14 @@ function updateMMTable(row, cell, val) {
 }
 
 function printCalculations() {
-    document.getElementById("results").innerHTML = 
-    "Log₂(" + mmsize + ") = " + addrBits + " bits.<br />" +
-    "Log₂(" + wsize + ") = " + byteBits + " bits.<br />" +
-    "Log₂(" + wperb + ") = " + wordBits + " bits.<br />" +
-    addrBits + " - (" + wordBits + " + " + byteBits + ") = " + blockBits + " bits.<br />" +
-    "Log₂(" + lines + ") = " + lineBits + " bits.<br />" +
-    "Log₂(" + lines + " / " + nway + ") = " + setBits + " bits.<br />" +
-    blockBits +  " - " + setBits + " = " + tagBits + " bits.";
+    calcTable = document.getElementById("calcTable").tBodies[0];
+    calcTable.rows[0].cells[1].innerHTML = "Log₂(" + mmsize + ") = " + addrBits + " bits";
+    calcTable.rows[1].cells[1].innerHTML = "Log₂(" + wsize + ") = " + byteBits + " bits";
+    calcTable.rows[2].cells[1].innerHTML = "Log₂(" + wperb + ") = " + wordBits + " bits";
+    calcTable.rows[3].cells[1].innerHTML = addrBits + " - (" + wordBits + " + " + byteBits + ") = " + blockBits + " bits.";
+    calcTable.rows[4].cells[1].innerHTML = "Log₂(" + lines + ") = " + lineBits + " bits.";
+    calcTable.rows[5].cells[1].innerHTML = "Log₂(" + lines + " / " + nway + ") = " + setBits + " bits";
+    calcTable.rows[6].cells[1].innerHTML = blockBits +  " - " + setBits + " = " + tagBits + " bits.";
 }
 
 function buildCM() {
@@ -246,19 +286,20 @@ function buildMM() {
  */
 function getRandomAddr() {
     let address = document.getElementById("address-input");
+    console.log("The address", address);
     address.value = Math.floor(Math.random() * (mmsize));
+    console.log(mmsize);
 }
 
 /**
  * Checks if the input address is valid
  */
 function isValidAddr() {
+    addr = parseInt(document.getElementById('address-input').value);
     return addr < mmsize;
 }
 
 function processAddr() {
-    addr = parseInt(document.getElementById('address-input').value);
-    if (!isValidAddr(addr)) return alert("Invalid address");
     op = document.getElementById("operation").value;
     binAddr = toBinary(addr, addrBits);
 
@@ -293,67 +334,6 @@ function processAddr() {
     updateMMTable(0, 2, bitsB);
 }
 
-function highlightSet(color) {
-    for (i = 0; i < nway; i++) {
-        let line = directory.rows[set*nway+i];
-        for (j = 0; j < 5; j++) line.cells[j].style.backgroundColor = color;
-    }
-}
-
-function highlightLine(line, color) {
-    for (i = 0; i < 5; i++) line.cells[i].style.backgroundColor = color;
-}
-
-function highlightBusyBit(color) {
-    for (i = 0; i < nway; i++) {
-        let line = set*nway+i;
-        directory.rows[line].cells[1].style.backgroundColor = color;
-    }
-}
-
-function highlightTag(color) {
-    for (i = 0; i < nway; i++) {
-        let line = set*nway+i;
-        directory.rows[line].cells[3].style.backgroundColor = color;
-    }
-}
-
-function highlightContent(color) {
-    for (i = 0; i < wperb; i++) content.tBodies[0].rows[line].cells[i].style.backgroundColor = color;
-}
-
-function highlightDirtyBit(color) {
-    directory.rows[line].cells[2].style.backgroundColor = color;
-}
-
-function hightlightReplacementBits(colorOldest, colorRest) {
-    line.cells[4].style.backgroundColor = colorOldest;
-    for (i = 0; i < nway; i++) {
-        let currLine = directory.rows[set*nway+i];
-        if (currLine.rowIndex != line.rowIndex) currLine.cells[4].style.backgroundColor = colorRest;
-    }
-}
-
-function highlightMMBlock(color) {
-    for (i = 0; i < wperb; i++) mm.rows[block].cells[i].style.backgroundColor = color; 
-}
-
-function removeSetHighlight() {
-    for (i = 0; i < nway; i++) {
-        let line = set*nway+i;
-        for(j = 0; j < 5; j++) directory.rows[line].cells[j].style.backgroundColor = "#fff";
-    }
-}
-
-function removeContentHighlight(line) {
-    console.log("The fucking line is: ", line);
-    for (i = 0; i < wperb; i++) content.tBodies[0].rows[line.rowIndex].cells[i].style.backgroundColor = "#fff";
-}
-
-function removeMMBlockHighlight() {
-    for (i = 0; i < wperb; i++) mm.rows[block].cells[i].style.backgroundColor = "#fff";
-}
-
 function checkHit() {
     // Find line into set
     hit = false;
@@ -371,57 +351,17 @@ function checkHit() {
     }
 }
 
-// else { // miss
-//         let line;
-
-//         // Update replacements bits in case of FIFO or LRU policies
-//         if (rpolicy == "fifo" || rpolicy == "lru") {
-//             line = getOldestLine();
-//             // Update the replacement bits
-//             updateReplBits(line);
-//         } else { // random
-//             let randLine = Math.floor(Math.random() * (set*nway+nway - set*nway) + set*nway);
-//             line = directory.rows[randLine];
-//         }
-
-//         // Tansfer the block
-//         transferBlock(line, blockData);
-        
-//         // Update the tag
-//         updateTag(line, tag);
-
-//         // Update busy bit
-//         if (busyBit == 0) updateBusyBit(line, 1);
-        
-//         if (op == "ld") { // reading
-//             if (line.cells[2].innerHTML == 1) {
-//                 // Message("Dirty bit is 1, so block is transferred to MM")
-//             }
-//         } else { // writing
-//             // Check writing policy
-//             if (wpolicy == "writeThrough") {
-//                 if (wrAlloc == "writeOnAround") {
-//                     // Message update memory block
-//                 }
-//             }  else { // Write back
-//                 if (wrAlloc == "writeOnAround") {
-//                     // Message update memory block
-//                 } else {
-//                     if (line.cells[2].innerHTML == 1) {
-//                         // Message("Dirty bit is 1, so block is transferred to MM")
-//                     }
-//                 }
-//             }
-//         }
-
-//     }
-// }
-
 function step() {
+    if (!isValidAddr(addr)) return alert("Invalid address");
+    if (s == 0) {
+        // Cycles per instruction are reseted
+        pTime = 0;
+        document.getElementById("addressInput").style.pointerEvents = "none";
+        document.getElementById("simController").style.pointerEvents = "auto";
+    }
     // Go to next step
     s++;
     let ins = document.getElementById("operation").value;
-    
     if (s > 3) {
         if (ins == "ld") loadStep();
         else storeStep();
@@ -445,6 +385,8 @@ function generalStep() {
             highlightSet("#F9E79F");
             highlightBusyBit("#F1C40F");
             highlightTag("#F1C40F");
+            pTime = tCM;
+            tTime += tCM;
             break;
 
         case 3: // Resolve hit or miss
@@ -476,6 +418,8 @@ function loadStep() {
                 // Check dirty bit for next step;
                 if (line.cells[2].innerHTML == 0) return step();
                 printSimStatus("Dirty bit is <b>1</b>, so the block is transfered from cache memory to main memory.");
+                pTime += tBt;
+                tTime += tBt;
             }
             break;
 
@@ -489,6 +433,8 @@ function loadStep() {
                 updateTag(line, tag);
                 // Update busy bit if it is 0
                 if (busyBit == 0) updateBusyBit(line, 1);
+                pTime += tBt;
+                tTime += tBt;
             }
             break;
 
@@ -517,12 +463,16 @@ function storeStep() {
                     printSimStatus("Write policy is write back, so dirty bit is set to 1.");
                     updateDirtyBit(line, 1);
                 } else { // write through
-                    printSimStatus("Block in memory is updated");
+                    printSimStatus("Block in main memory is updated");
+                    pTime += tMM;
+                    tTime += tMM;
                 }
             } else { // write around case
                 if (wrAlloc == "writeAround") {
-                   printSimStatus("The write policy is <b>" + wpolicy == "writeThrough" ? "write through" : "write back" + "</b> and "
-                   +  "<b>write on allocate</b>, so the block is going to be updated just in main memory.");
+                    printSimStatus("The write policy is <b>" + wpolicy == "writeThrough" ? "write through" : "write back" + "</b> and "
+                    +  "<b>write on allocate</b>, so the block is going to be updated just in main memory.");
+                    pTime += tMM;
+                    tTime += tMM;
                 } else return step();
             }
             break;
@@ -532,7 +482,11 @@ function storeStep() {
             else {
                 console.log("policy: " + wpolicy + " " + wrAlloc);
                 if (wpolicy == "writeBack" && wrAlloc == "writeOnAllocate") {
-                    if (checkDirtyBit(line) == 1) printSimStatus("The write policy is <b>write back</b> and <b>write on allocate</b>. The dirty bit is equal to 1, so the block is transferred from cache memory to main memory.");
+                    if (checkDirtyBit(line) == 1) {
+                        printSimStatus("The write policy is <b>write back</b> and <b>write on allocate</b>. The dirty bit is equal to 1, so the block is transferred from cache memory to main memory.");
+                        pTime += tBt;
+                        tTime += tBt;
+                    }
                     else return step(); // write around with write on allocate
                 } else endOfSimulation();
             }
@@ -549,6 +503,8 @@ function storeStep() {
                 if (checkDirtyBit(line) == 1) updateDirtyBit(line, 0);
                 // Update busy bit if it is 0
                 if (busyBit == 0) updateBusyBit(line, 1);
+                    pTime += tBt;
+                    tTime += tBt;
             }
             break;
         case 7: // Apply replacement policy
@@ -573,6 +529,11 @@ function endOfSimulation() {
     removeSetHighlight();
     removeContentHighlight(line);
     removeMMBlockHighlight();
+    document.getElementById("simController").style.pointerEvents = "none";
+    document.getElementById("addressInput").style.pointerEvents = "auto";
+
+    console.log("Partial time: ", pTime);
+    console.log("Total time: ", tTime);
 }
 
 function toBinary(n, fill) {
@@ -636,4 +597,67 @@ function transferBlock(line, block) {
 function printSimStatus(msg, bgColor = "#fff") {
     document.getElementById("simMsg").innerHTML = msg;
     document.getElementById("simMsgWrapper").style.backgroundColor = bgColor;
+}
+
+// ---------------Element highlighters---------------
+
+function highlightSet(color) {
+    for (i = 0; i < nway; i++) {
+        let line = directory.rows[set*nway+i];
+        for (j = 0; j < 5; j++) line.cells[j].style.backgroundColor = color;
+    }
+}
+
+function highlightLine(line, color) {
+    for (i = 0; i < 5; i++) line.cells[i].style.backgroundColor = color;
+}
+
+function highlightBusyBit(color) {
+    for (i = 0; i < nway; i++) {
+        let line = set*nway+i;
+        directory.rows[line].cells[1].style.backgroundColor = color;
+    }
+}
+
+function highlightTag(color) {
+    for (i = 0; i < nway; i++) {
+        let line = set*nway+i;
+        directory.rows[line].cells[3].style.backgroundColor = color;
+    }
+}
+
+function highlightContent(color) {
+    for (i = 0; i < wperb; i++) content.tBodies[0].rows[line].cells[i].style.backgroundColor = color;
+}
+
+function highlightDirtyBit(color) {
+    directory.rows[line].cells[2].style.backgroundColor = color;
+}
+
+function hightlightReplacementBits(colorOldest, colorRest) {
+    line.cells[4].style.backgroundColor = colorOldest;
+    for (i = 0; i < nway; i++) {
+        let currLine = directory.rows[set*nway+i];
+        if (currLine.rowIndex != line.rowIndex) currLine.cells[4].style.backgroundColor = colorRest;
+    }
+}
+
+function highlightMMBlock(color) {
+    for (i = 0; i < wperb; i++) mm.rows[block].cells[i].style.backgroundColor = color; 
+}
+
+function removeSetHighlight() {
+    for (i = 0; i < nway; i++) {
+        let line = set*nway+i;
+        for(j = 0; j < 5; j++) directory.rows[line].cells[j].style.backgroundColor = "#fff";
+    }
+}
+
+function removeContentHighlight(line) {
+    console.log("The fucking line is: ", line);
+    for (i = 0; i < wperb; i++) content.tBodies[0].rows[line.rowIndex].cells[i].style.backgroundColor = "#fff";
+}
+
+function removeMMBlockHighlight() {
+    for (i = 0; i < wperb; i++) mm.rows[block].cells[i].style.backgroundColor = "#fff";
 }

@@ -302,8 +302,8 @@
 
                 <!--  -->
                 <div class="statistics row gx-3">
-                    <div id="calcTableWrapper" class="calc-table-wrapper col-sm-3">
-                        <table id="calcTable" class="calc-table table table-bordered table-sm table-dark">
+                    <div id="calcTableWrapper" class="calc-table-wrapper col-sm-4">
+                        <table id="calcTable" class="calc-table table table-bordered table-sm table-dark z-depth-1">
                             <tbody>
                                 <tr>
                                     <td>Address length</td>
@@ -336,12 +336,21 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="col-sm-4">
-                        Papito remolinos
+                    <div class="col-sm-4 time-table-wrapper">
+                        <table id="tTable" class="time-table table tabe-bordered table-sm table-dark z-depth-1">
+                            <thead>
+                                <tr>
+                                    <th>Partial access time</th>
+                                    <th>Total access time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                     </div>
                     <div class="col-sm-4">
                         <div class="statistics-chart p-3 z-depth-1">
-                            Statistic chart
+                            <canvas id="pieChart"></canvas>
                         </div>
                     </div>
                 </div>

@@ -45,6 +45,23 @@ for (ppolicy in ppolicies) {
     }
 }
 
+// Initialize statistics chart
+var ctxP = document.getElementById("pieChart").getContext('2d');
+var statChart = new Chart(ctxP, {
+    type: 'pie',
+    data: {
+        labels: ["Hit", "Miss"],
+        datasets: [{
+        data: [0, 0],
+        backgroundColor: ["#2ECC71", "#E74C3C"],
+        hoverBackgroundColor: ["#58D68D", "#EC7063"]
+    }]
+    },
+    options: {
+    responsive: true
+    }
+});
+
 function onSubmit() {
     submitBtn = document.getElementById("submit");
     if(submitBtn.value == "submit") {
@@ -358,6 +375,7 @@ function step() {
         pTime = 0;
         document.getElementById("addressInput").style.pointerEvents = "none";
         document.getElementById("simController").style.pointerEvents = "auto";
+        createTimeRow();
     }
     // Go to next step
     s++;
@@ -387,14 +405,17 @@ function generalStep() {
             highlightTag("#F1C40F");
             pTime = tCM;
             tTime += tCM;
+            updateTimeRow();
             break;
 
         case 3: // Resolve hit or miss
             checkHit();
             if (hit) {
+                addHit();
                 printSimStatus("A line with busy bit to 1 and matching tag has been found, so it is a cache <b>hit</b>.", "rgba(88, 214, 141, .5)");
                 highlightLine(line, "rgba(88, 214, 141, .5)");
             } else {
+                addMiss();
                 printSimStatus("Since there is not a line with the busy bit to 1 and same tag, it is a cache <b>miss</b>.", "rgba(236, 112, 99, .5)");
                 highlightSet("rgba(236, 112, 99, .5)")
                 // get line depending on replacement policy
@@ -420,6 +441,7 @@ function loadStep() {
                 printSimStatus("Dirty bit is <b>1</b>, so the block is transfered from cache memory to main memory.");
                 pTime += tBt;
                 tTime += tBt;
+                updateTimeRow();
             }
             break;
 
@@ -435,6 +457,7 @@ function loadStep() {
                 if (busyBit == 0) updateBusyBit(line, 1);
                 pTime += tBt;
                 tTime += tBt;
+                updateTimeRow();
             }
             break;
 
@@ -466,6 +489,7 @@ function storeStep() {
                     printSimStatus("Block in main memory is updated");
                     pTime += tMM;
                     tTime += tMM;
+                    updateTimeRow();
                 }
             } else { // write around case
                 if (wrAlloc == "writeAround") {
@@ -473,6 +497,7 @@ function storeStep() {
                     +  "<b>write on allocate</b>, so the block is going to be updated just in main memory.");
                     pTime += tMM;
                     tTime += tMM;
+                    updateTimeRow();
                 } else return step();
             }
             break;
@@ -486,6 +511,7 @@ function storeStep() {
                         printSimStatus("The write policy is <b>write back</b> and <b>write on allocate</b>. The dirty bit is equal to 1, so the block is transferred from cache memory to main memory.");
                         pTime += tBt;
                         tTime += tBt;
+                        updateTimeRow();
                     }
                     else return step(); // write around with write on allocate
                 } else endOfSimulation();
@@ -505,6 +531,7 @@ function storeStep() {
                 if (busyBit == 0) updateBusyBit(line, 1);
                     pTime += tBt;
                     tTime += tBt;
+                    updateTimeRow();
             }
             break;
         case 7: // Apply replacement policy
@@ -598,6 +625,35 @@ function printSimStatus(msg, bgColor = "#fff") {
     document.getElementById("simMsg").innerHTML = msg;
     document.getElementById("simMsgWrapper").style.backgroundColor = bgColor;
 }
+
+function createTimeRow() {
+    console.log("table: ", document.getElementById("tTable").tBodies[0]);
+    let lastRow = document.getElementById("tTable").tBodies[0].insertRow();
+    lastRow.insertCell().innerHTML = 0;
+    lastRow.insertCell().innerHTML = tTime;
+}
+
+function updateTimeRow() {
+    let lastRowIndex = document.getElementById("tTable").tBodies[0].rows.length-1;
+    let lastRow = document.getElementById("tTable").tBodies[0].rows[lastRowIndex];
+    lastRow.cells[0].innerHTML = pTime;
+    lastRow.cells[1].innerHTML = tTime;
+}
+
+function addHit() {
+    statChart.data.datasets[0].data[0]++;
+    statChart.update();
+}
+
+function addMiss() {
+    statChart.data.datasets[0].data[1]++;
+    statChart.update();
+}
+
+
+
+
+
 
 // ---------------Element highlighters---------------
 

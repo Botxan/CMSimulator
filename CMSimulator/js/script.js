@@ -676,7 +676,7 @@ function getOldestLine() {
 /**
  * Simulates a block transference from main memory to cache memory
  * @param {HTMLTableRowElement} line  line in cache memory
- * @param {*} block the data block
+ * @param {String} block the data block
  */
 function transferBlock(line, block) {
     for (i = 0; i < wperb; i++) {

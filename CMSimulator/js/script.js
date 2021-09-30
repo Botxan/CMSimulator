@@ -1,3 +1,5 @@
+
+
 // Form values
 var cmsize, tCM, mmsize, tMM, tBuff, wsize, wperb, nwayInput, nway, ppolicy, wpolicy, wrAlloc, rpolicy, lines;
 
@@ -30,7 +32,7 @@ mmAddr = document.getElementById("MMAddr").tBodies[0];
 // Cache memory and main memory tables
 var directory = document.getElementById("directory").tBodies[0];
 var content = document.getElementById("content");
-var mm = document.getElementById("mm").tBodies[0];
+var mm = document.getElementById("mm");
 
 // Enable "number of sets" field only in set-associative option
 var ppolicies = document.forms["setupForm"].elements["ppolicy"];
@@ -62,6 +64,10 @@ var statChart = new Chart(ctxP, {
     }
 });
 
+/**
+ * 
+ * @returns Changes the submit button to reset. Starts form validtion
+ */
 function onSubmit() {
     submitBtn = document.getElementById("submit");
     if(submitBtn.value == "submit") {
@@ -79,12 +85,18 @@ function onSubmit() {
     return false;
 }
 
+/**
+ * Disables the setup form
+ */
 function disableForm() {
-    document.getElementById("setup").style.backgroundColor = "#dddddd";
     document.getElementById("sizes").style.pointerEvents = "none";
     document.getElementById("ppolicy").style.pointerEvents = "none";
     document.getElementById("wpolicy").style.pointerEvents = "none";
     document.getElementById("rpolicy").style.pointerEvents = "none";   
+    document.getElementById("setup").style.backgroundColor = "rgba(112, 123, 124, .3)";
+    $("#setup > h1").css("opacity", ".5");
+    $('form[name="setupForm"]').children().not(".submit-wrapper").css("opacity", ".5");
+    $('input[type=number]').addClass('readonly');
 }
 
 /** Resets the app */
@@ -170,7 +182,7 @@ function validateSetupForm() {
         buildCM();
         buildMM();
         document.getElementById("address-input").focus();
-        document.getElementById("addressInput").style.pointerEvents = "auto";
+        toggleAddrBtns();
     } else alert(err);
 
     // console.log("Form values:\n" + "Cache memory size: " + cmsize + ".\nCache memory access time; " + tCM
@@ -259,6 +271,9 @@ function printCalculations() {
     calcTable.rows[6].cells[1].innerHTML = blockBits +  " - " + setBits + " = " + tagBits + " bits.";
 }
 
+/**
+ * Draws the cache memory on the screen
+ */
 function buildCM() {
     let row;
 
@@ -282,16 +297,19 @@ function buildCM() {
     }
 }
 
+/** Draws the main memory on the screen */
 function buildMM() {
     let blSize = wperb * wsize;
     let row;
 
     // Empty in case there was previous data
-    mm.innerHTML = "";
+    mm.tBodies[0].innerHTML = "";
+
+    mm.tHead.rows[0].cells[0].colSpan = wperb;
 
     // Block per row
     for (i = 0; i < mmsize / blSize; i++) {
-        row = mm.insertRow();
+        row = mm.tBodies[0].insertRow();
         for (j = 0; j < wperb; j++) {
             row.insertCell().innerHTML = "B" + i + "W" + j;
         }
@@ -303,9 +321,7 @@ function buildMM() {
  */
 function getRandomAddr() {
     let address = document.getElementById("address-input");
-    console.log("The address", address);
     address.value = Math.floor(Math.random() * (mmsize));
-    console.log(mmsize);
 }
 
 /**
@@ -316,8 +332,11 @@ function isValidAddr() {
     return addr < mmsize;
 }
 
+/**
+ * Takes the addr, separates it in bits and updates the address tables with the obtained values
+ */
 function processAddr() {
-    op = document.getElementById("operation").value;
+    op = document.querySelector('input[name="operation"]:checked').value;
     binAddr = toBinary(addr, addrBits);
 
     bitsB = binAddr.substring(binAddr.length - byteBits);  
@@ -337,7 +356,7 @@ function processAddr() {
     else set = parseInt(bitsS, 2);
 
     // Obtain block data
-    for (i = 0; i < wperb; i++) blockData[i] = mm.rows[block].cells[i].innerHTML;
+    for (i = 0; i < wperb; i++) blockData[i] = mm.tBodies[0].rows[block].cells[i].innerHTML;
 
     // Update CM address table with binary address
     updateCMTable(0, 0, bitsT);
@@ -351,6 +370,7 @@ function processAddr() {
     updateMMTable(0, 2, bitsB);
 }
 
+/** Check if there has been a hit or miss */
 function checkHit() {
     // Find line into set
     hit = false;
@@ -368,18 +388,21 @@ function checkHit() {
     }
 }
 
+/**
+ * Goes to the next step in the simulation
+ */
 function step() {
     if (!isValidAddr(addr)) return alert("Invalid address");
     if (s == 0) {
         // Cycles per instruction are reseted
         pTime = 0;
-        document.getElementById("addressInput").style.pointerEvents = "none";
-        document.getElementById("simController").style.pointerEvents = "auto";
+        toggleAddrBtns();
+        toggleSimControls();
         createTimeRow();
     }
     // Go to next step
     s++;
-    let ins = document.getElementById("operation").value;
+    let ins = document.querySelector('input[name="operation"]:checked').value;
     if (s > 3) {
         if (ins == "ld") loadStep();
         else storeStep();
@@ -405,7 +428,7 @@ function generalStep() {
             highlightTag("#F1C40F");
             pTime = tCM;
             tTime += tCM;
-            updateTimeRow();
+            updateTimeRow(tCM);
             break;
 
         case 3: // Resolve hit or miss
@@ -441,7 +464,7 @@ function loadStep() {
                 printSimStatus("Dirty bit is <b>1</b>, so the block is transfered from cache memory to main memory.");
                 pTime += tBt;
                 tTime += tBt;
-                updateTimeRow();
+                updateTimeRow(tBt);
             }
             break;
 
@@ -457,7 +480,7 @@ function loadStep() {
                 if (busyBit == 0) updateBusyBit(line, 1);
                 pTime += tBt;
                 tTime += tBt;
-                updateTimeRow();
+                updateTimeRow(tBt);
             }
             break;
 
@@ -466,7 +489,7 @@ function loadStep() {
             // If hit and lru or miss and lru|fifo => change replacement bits
             let replace = (hit && rpolicy == "lru") || (!hit && (rpolicy == "lru" | rpolicy == "fifo")) ? true : false;
             if (replace) {
-                hightlightReplacementBits("#AF7AC5", "#D7BDE2");
+                highlightReplacementBits("#3498DB", "#85C1E9");
                 updateReplBits(line);
                 printSimStatus("Replacement bits are updated according to replacement policy <b>" + rpolicy + "</b>.");
             } else return step();
@@ -483,13 +506,14 @@ function storeStep() {
         case 4:
             if (hit) {
                 if (wpolicy == "writeBack") {
-                    printSimStatus("Write policy is write back, so dirty bit is set to 1.");
+                    printSimStatus("Write policy is <b>write back</b>, so dirty bit is set to <b>1</b>.");
                     updateDirtyBit(line, 1);
+                    highlightDirtyBit("#229954");
                 } else { // write through
                     printSimStatus("Block in main memory is updated");
                     pTime += tMM;
                     tTime += tMM;
-                    updateTimeRow();
+                    updateTimeRow(tMM);
                 }
             } else { // write around case
                 if (wrAlloc == "writeAround") {
@@ -497,7 +521,7 @@ function storeStep() {
                     +  "<b>write on allocate</b>, so the block is going to be updated just in main memory.");
                     pTime += tMM;
                     tTime += tMM;
-                    updateTimeRow();
+                    updateTimeRow(tMM);
                 } else return step();
             }
             break;
@@ -505,13 +529,12 @@ function storeStep() {
         case 5:
             if (hit) return step();
             else {
-                console.log("policy: " + wpolicy + " " + wrAlloc);
                 if (wpolicy == "writeBack" && wrAlloc == "writeOnAllocate") {
                     if (checkDirtyBit(line) == 1) {
                         printSimStatus("The write policy is <b>write back</b> and <b>write on allocate</b>. The dirty bit is equal to 1, so the block is transferred from cache memory to main memory.");
                         pTime += tBt;
                         tTime += tBt;
-                        updateTimeRow();
+                        updateTimeRow(tBt);
                     }
                     else return step(); // write around with write on allocate
                 } else endOfSimulation();
@@ -531,7 +554,7 @@ function storeStep() {
                 if (busyBit == 0) updateBusyBit(line, 1);
                     pTime += tBt;
                     tTime += tBt;
-                    updateTimeRow();
+                    updateTimeRow(tBt);
             }
             break;
         case 7: // Apply replacement policy
@@ -539,7 +562,7 @@ function storeStep() {
             // If hit and lru or miss and lru|fifo => change replacement bits
             let replace = (hit && rpolicy == "lru") || (!hit && (rpolicy == "lru" | rpolicy == "fifo")) ? true : false;
             if (replace) {
-                hightlightReplacementBits("#AF7AC5", "#D7BDE2");
+                highlightReplacementBits("#3498DB", "#85C1E9");
                 updateReplBits(line);
                 printSimStatus("Replacement bits are updated according to replacement policy <b>" + rpolicy + "</b>.");
             } else return step();
@@ -550,27 +573,36 @@ function storeStep() {
     }
 }
 
+/* Removes all the highlighted stuff in the tables and enables the address input */
 function endOfSimulation() {
     printSimStatus("End of the operation. Submit another address to continue.");
     s = 0;
     removeSetHighlight();
     removeContentHighlight(line);
     removeMMBlockHighlight();
-    document.getElementById("simController").style.pointerEvents = "none";
-    document.getElementById("addressInput").style.pointerEvents = "auto";
-
-    console.log("Partial time: ", pTime);
-    console.log("Total time: ", tTime);
+    updateTimeRowWithPartial();
+    toggleAddrBtns();
+    toggleSimControls();
 }
 
+/**
+ * Converts a decimal number to binary number with the desired zerofill
+ * @param {number} n the number to get converted
+ * @param {String} fill the number of zeroes to the left
+ * @returns the binary number with the selected zerofill
+ */
 function toBinary(n, fill) {
     return ("0".repeat(fill)+n.toString(2)).slice(-fill);
 }
 
+/**
+ * Updates the replacement bits
+ * @param {HTMLTableRowElement} line line in the cache memory
+ */
 function updateReplBits(line) {
     // Reduce replacement bits for the rest of lines with higher repl bits
     for (i = 0; i < nway; i++) {
-        if (set*nway+i != line.rowIndex-1) {
+        if (set*nway+i-1 != line.rowIndex-1) {
             currLine = set*nway+i;
             currLine = directory.rows[currLine];
             currLineReplBits = parseInt(currLine.cells[4].innerHTML, 2);
@@ -585,22 +617,46 @@ function updateReplBits(line) {
     line.cells[4].innerHTML = toBinary(nway-1, Math.log2(nway));
 }
 
+/**
+ * Updates the tag
+ * @param {HTMLTableRowElement} line line in the cache memory
+ * @param {String} tag the new tag
+ */
 function updateTag(line, tag) {
     line.cells[3].innerHTML = toBinary(tag, tagBits);
 }
 
+/**
+ * Updates the busy bit
+ * @param {HTMLTableRowElement} line line in the cache memory
+ * @param {String} bit the new busy bit
+ */
 function updateBusyBit(line, bit)  {
     line.cells[1].innerHTML = bit;
 }
 
+/**
+ * Gets the dirty bit from the cache memory line
+ * @param {HTMLTableRowElement} line line in the cache memory
+ * @returns the dirty bit
+ */
 function checkDirtyBit(line) {
     return line.cells[2].innerHTML;
 }
 
+/**
+ * Updates the dirty bit in the cache line
+ * @param {HTMLTableRowElement} line line in the cache memory
+ * @param {*} bit the new dirty bit
+ */
 function updateDirtyBit(line, bit) {
     line.cells[2].innerHTML = bit;
 }
 
+/**
+ * Finds and returns the oldest in cache memory
+ * @returns The oldest line based on LRU/FIFO
+ */
 function getOldestLine() {
     // Find the oldest line (LRU or FIFO is same on miss)
     let oldestLine = directory.rows[set*nway];
@@ -617,41 +673,88 @@ function getOldestLine() {
     return oldestLine;
 }
 
+/**
+ * Simulates a block transference from main memory to cache memory
+ * @param {HTMLTableRowElement} line  line in cache memory
+ * @param {*} block the data block
+ */
 function transferBlock(line, block) {
-    for (i = 0; i < wperb; i++) content.rows[line.rowIndex].cells[i].innerHTML = block[i];
+    for (i = 0; i < wperb; i++) {
+        content.rows[line.rowIndex-1].cells[i].innerHTML = block[i];
+    }
 }
 
+/**
+ * Prints on the screen the simulator status
+ * @param {String} msg the message to get printed
+ * @param {String} bgColor the background for the message wrapper
+ */
 function printSimStatus(msg, bgColor = "#fff") {
     document.getElementById("simMsg").innerHTML = msg;
     document.getElementById("simMsgWrapper").style.backgroundColor = bgColor;
 }
 
+/**
+ * Adds a new row in the access times table
+ */
 function createTimeRow() {
-    console.log("table: ", document.getElementById("tTable").tBodies[0]);
     let lastRow = document.getElementById("tTable").tBodies[0].insertRow();
-    lastRow.insertCell().innerHTML = 0;
+    lastRow.insertCell().innerHTML;
     lastRow.insertCell().innerHTML = tTime;
 }
 
-function updateTimeRow() {
+/**
+ * Updates the last row in the access times table
+ * @param {} cycles 
+ */
+function updateTimeRow(cycles) {
     let lastRowIndex = document.getElementById("tTable").tBodies[0].rows.length-1;
     let lastRow = document.getElementById("tTable").tBodies[0].rows[lastRowIndex];
-    lastRow.cells[0].innerHTML = pTime;
+    lastRow.cells[0].innerHTML += cycles + " + ";
     lastRow.cells[1].innerHTML = tTime;
 }
 
+/**
+ * Adds the result to the partial access time in access times table
+ */
+function updateTimeRowWithPartial() {
+    let lastRowIndex = document.getElementById("tTable").tBodies[0].rows.length-1;
+    let partial = document.getElementById("tTable").tBodies[0].rows[lastRowIndex].cells[0];
+    partial.innerHTML = partial.innerHTML.substring(0, partial.innerHTML.length-2) + "= " + pTime;
+}
+
+/**
+ * Adds a hit to hit/miss chart
+ */
 function addHit() {
     statChart.data.datasets[0].data[0]++;
     statChart.update();
 }
 
+/**
+ * Adds a miss to hit/miss chart
+ */
 function addMiss() {
     statChart.data.datasets[0].data[1]++;
     statChart.update();
 }
 
+/**
+ * Enables/disables the address input
+ */
+function toggleAddrBtns() {
+    document.getElementById("randAddr").classList.toggle("disabled");
+    document.getElementById("address-input").toggleAttribute("disabled");
+    document.querySelector('input[type="radio"][value="ld"]').toggleAttribute("disabled");
+    document.querySelector('input[type="radio"][value="st"]').toggleAttribute("disabled");
+    document.getElementById("send").classList.toggle("disabled");
+}
 
-
+/** Enables/disables the simulator controller */
+function toggleSimControls() {
+    document.getElementById("next").classList.toggle("disabled");
+    document.getElementById("fast-forward").classList.toggle("disabled");   
+}
 
 
 
@@ -687,10 +790,10 @@ function highlightContent(color) {
 }
 
 function highlightDirtyBit(color) {
-    directory.rows[line].cells[2].style.backgroundColor = color;
+    line.cells[2].style.backgroundColor = color;
 }
 
-function hightlightReplacementBits(colorOldest, colorRest) {
+function highlightReplacementBits(colorOldest, colorRest) {
     line.cells[4].style.backgroundColor = colorOldest;
     for (i = 0; i < nway; i++) {
         let currLine = directory.rows[set*nway+i];
@@ -699,7 +802,7 @@ function hightlightReplacementBits(colorOldest, colorRest) {
 }
 
 function highlightMMBlock(color) {
-    for (i = 0; i < wperb; i++) mm.rows[block].cells[i].style.backgroundColor = color; 
+    for (i = 0; i < wperb; i++) mm.tBodies[0].rows[block].cells[i].style.backgroundColor = color; 
 }
 
 function removeSetHighlight() {
@@ -710,10 +813,9 @@ function removeSetHighlight() {
 }
 
 function removeContentHighlight(line) {
-    console.log("The fucking line is: ", line);
-    for (i = 0; i < wperb; i++) content.tBodies[0].rows[line.rowIndex].cells[i].style.backgroundColor = "#fff";
+    for (i = 0; i < wperb; i++) content.tBodies[0].rows[line.rowIndex-1].cells[i].style.backgroundColor = "#fff";
 }
 
 function removeMMBlockHighlight() {
-    for (i = 0; i < wperb; i++) mm.rows[block].cells[i].style.backgroundColor = "#fff";
+    for (i = 0; i < wperb; i++) mm.tBodies[0].rows[block].cells[i].style.backgroundColor = "#fff";
 }

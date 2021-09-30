@@ -19,14 +19,24 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- 
+
+
+        
+    "El registro IME, Instruction Master? Of Puppets!!!." ~I.Morlán.
+
+
+
+     -->
     <div class="main px-4">
         <div class="row gx-3">
-            <div class="col-md-3">
-                <div id="setup" class="setup p-3 z-depth-1 d-flex flex-column">
-                    <h1>CMSimulator</h1>
-                    <form name="setupForm" action="" class="flex-grow-1 d-flex flex-column" onsubmit="return onSubmit()">
-                        <div id="sizes" class="sizes mb-2">  
-                            <h6 class="mb-3">Sizes and time costs</h6> 
+            <div class="col-sm-4">
+                <div id="setup" class="card setup p-3 scrollbar-primary square">
+                    <h1>CMSim</h1>
+                    <form name="setupForm" action="" onsubmit="return onSubmit()">
+                        <div id="sizes" class="sizes">  
+                            <hr>
+                            <h6>Sizes and time costs</h6> 
                             <!-- CM -->          
                             <div class="md-form input-group">
                                 <div class="input-group-prepend">
@@ -40,7 +50,6 @@
                                 <div class="input-group-append">
                                     <span class="input-group-text md-addon">cycles</span>
                                 </div>
-
                             </div>
 
                             <!-- MM size -->
@@ -85,6 +94,8 @@
                             </div>
                         </div>
 
+                        <hr>
+
                         <!-- Placement policy -->
                         <div id="ppolicy" class="placement-policy mt-2 mb-2">
                             <h6 class="mb-3">Placement policy</h6>                            
@@ -114,6 +125,8 @@
                                 </div>
                             </div>
                         </div>
+
+                        <hr>
         
                         <!-- Writing policy -->
                         <div id="wpolicy" class="wpolicy mt-2 mb-2">
@@ -129,6 +142,8 @@
                                 </label>
                             </div>
 
+                            <hr>
+
                             <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
                                 <label class="btn btn-primary active">
                                     <input type="radio" name="wrAlloc" autocomplete="off" value="writeOnAllocate" checked>
@@ -140,6 +155,8 @@
                                 </label>
                             </div>
                         </div>
+
+                        <hr>
         
                         <!-- Replacement policy -->
                         <div id="rpolicy" class="replacement-policy mt-2 mb-2">
@@ -160,40 +177,40 @@
                             </div>
                         </div>
 
-                        <div class="d-flex flex-grow-1 align-items-end mt-2">
+                        <hr>
+
+                        <div class="submit-wrapper d-flex flex-grow-1 align-items-end mt-2">
                             <button id="submit" type="submit" class="btn btn-default btn-lg w-100" value="submit">Submit</button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <div class="col-md-9">
+            <div class="col-sm-8">
                 <!-- Card deck -->
                 <div class="addr-structures card-deck addr-structures">
                     <!-- Cache memory address -->
                     <div class="card mb-4">
-                        <div class="table-wrapper">
-                            <!--Table-->
-                            <table id="CMAddr" class="table table-dark table-bordered table-sm mb-0">
-                                <!--Table head-->
-                                <thead>
+                        <!--Table-->
+                        <table id="CMAddr" class="table table-bordered table-dark table-sm mb-0">
+                            <!--Table head-->
+                            <thead>
                                 <tr>
-                                    <th class="th-sm" data-toggle="tooltip" data-placement="right" title="Bits for block - bits for line/set">TAG</th>
-                                    <th class="th-sm" data-toggle="tooltip" data-placement="right" title="CM size / (Words per block + Word size)">SET</th>
-                                    <th class="th-sm" data-toggle="tooltip" data-placement="right"  title="Log₂(Words per block)">WORD</th>
-                                    <th class="th-sm" data-toggle="tooltip" data-placement="right"  title="Log₂(Word size)">BYTE</th>
+                                    <th class="th-sm">TAG</th>
+                                    <th class="th-sm">SET</th>
+                                    <th class="th-sm">WORD</th>
+                                    <th class="th-sm">BYTE</th>
                                 </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
 
                     <!-- Simulator status -->
@@ -209,9 +226,9 @@
                                 <!--Table head-->
                                 <thead>
                                     <tr>
-                                        <th class="th-sm" data-toggle="tooltip" data-placement="right" title="Address length - (word bits + byte bits)">BLOCK</th>
-                                        <th class="th-sm" data-toggle="tooltip" data-placement="right" title="Log₂(Words per block)">WORD</th>
-                                        <th class="th-sm" data-toggle="tooltip" data-placement="right" title="Log₂(Word size)">BYTE</th>
+                                        <th class="th-sm">BLOCK</th>
+                                        <th class="th-sm">WORD</th>
+                                        <th class="th-sm">BYTE</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -225,37 +242,61 @@
                         </div>
                     </div>
                 </div>
-               
-                <!-- Address input -->
-                <div id="addressInput" class="md-form input-group mb-3 address-input-wrapper">
-                    <div class="input-group-prepend">
-                        <button class="btn btn-md btn-primary m-0 px-3" type="button" onclick="getRandomAddr()">Gen. random address</button>
+
+                <!-- Simulator -->
+                <div class="card simulator p-3 d-flex flex-column mt-1">
+                    <div id="simController" class="sim-controller blue-gradient d-flex justify-content-around align-items-center">
+                        <div id="addressInput">
+                            <button id="randAddr" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2 disabled" onclick="getRandomAddr()">
+                                Gen. rand. addr
+                                <i class="fas fa-random"></i>
+                            </button>
+                            <input id="address-input" name="address-input" type="number" placeholder="Introduce an instruction (byte)" class="address-input z-depth-1" disabled>
+                            <div class="custom-control custom-radio custom-control-inline text-white">
+                                <input type="radio" class="custom-control-input" id="ld" class="ld" name="operation" value="ld" checked disabled>
+                                <label class="custom-control-label" for="ld">ld</label>
+                            </div>
+                                
+                            <div class="custom-control custom-radio custom-control-inline text-white">
+                                <input type="radio" class="custom-control-input" id="st" name="operation" value="st" disabled>
+                                <label class="custom-control-label" for="st">st</label>
+                            </div>
+                            <button id="send" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2 disabled" onclick="step()">
+                                Send instruction
+                                <i class="fas fa-chevron-down"></i>
+                            </button>     
+                        </div>
+
+                        <div>
+                            <button id="next" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2 disabled" onclick="step()">
+                                Next
+                                <i class="fas fa-angle-right"></i>
+                            </button>
+                            <button id="fast-forward" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2 disabled">
+                                Fast forward
+                                <i class="fas fa-angle-double-right"></i>
+                            </button>
+                        </div>
                     </div>
-                    <input id="address-input" name="address-input" type="number" class="form-control" placeholder="Introduce an address (byte)" aria-label="Instruction input">
-                    <div class="input-group-append">
-                        <select id="operation" class="custom-select">
-                            <option value="ld">Ld</option>
-                            <option value="st" selected>St</option>
-                        </select>
-                    </div>
-                    <div class="input-group-append">
-                        <button class="btn btn-md btn-default m-0 px-3" type="button" onclick="step()">Send</button>
-                    </div>
-                </div>
-                <div class="simulator p-3 z-depth-1 d-flex flex-column">
                     <div class="row">
                         <div class="col-sm-7 text-center">
-                            <h6>Cache memory</h6>
+                            <h5>Cache memory</h5>
                             <div class="row">
                                 <div class="col-sm-4">
                                     <div class="table-wrapper">
                                         <table id="directory" class="table table-bordered table-sm directory">
                                             <thead>
-                                                <th>set</th>
-                                                <th>busy</th>
-                                                <th>dirty</th>
-                                                <th>tag</th>
-                                                <th>repl</th>
+                                                <tr>
+                                                    <th colspan="5">
+                                                        Directory</tr>
+                                                    </th>
+                                                <tr>
+                                                    <th>set</th>
+                                                    <th>busy</th>
+                                                    <th>dirty</th>
+                                                    <th>tag</th>
+                                                    <th>repl</th>
+                                                </tr>
                                             </thead>
                                             <tbody></tbody>
                                         </table>
@@ -263,9 +304,11 @@
                                 </div>
                                 <div class="col-sm-8">
                                     <div class="table wrapper">
-                                        <table id="content" class="table table-bordered table-sm content">
+                                        <table id="content" class="content table table-bordered table-sm content">
                                             <thead>
-                                                <th>content</th>
+                                                <tr>
+                                                    <th>content</th>
+                                                </tr>
                                             </thead>
                                             <tbody>
                                             </tbody>
@@ -275,35 +318,26 @@
                             </div>
                         </div>
                         <div class="col-sm-5 text-center">
-                            <h6>Main memory</h6>
-                            <div class="table-wrapper">
+                            <h5>Main memory</h5>
+                            <div class="table-wrapper scrollbar-primary square">
                                 <table id="mm" class="table table-sm table-bordered mm">
+                                    <thead>
+                                        <tr>
+                                            <th>Blocks</th>
+                                        </tr>
+                                    </thead>
                                     <tbody>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex flex-grow-1 align-items-end">
-                        <div id="simController" class="sim-controller blue-gradient d-flex flex-grow-1 justify-content-center align-items-center" style="margin: auto -16px -16px -16px">
-                            <div>
-                                <button id="next" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2" onclick="step()">
-                                    Next
-                                    <i class="fas fa-angle-right"></i>
-                                </button>
-                                <button id="fast-forward" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2">
-                                    Fast forward
-                                    <i class="fas fa-angle-double-right"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
-                <!--  -->
-                <div class="statistics row gx-3">
-                    <div id="calcTableWrapper" class="calc-table-wrapper col-sm-4">
-                        <table id="calcTable" class="calc-table table table-bordered table-sm table-dark z-depth-1">
+                <!-- Formulas, cycles and statistics -->
+                <div class="statistics row mt-4">
+                    <div id="calcTableWrapper" class="calc-table-wrapper col-sm-4 ">
+                        <table id="calcTable" class="calc-table table table-bordered table-sm table-dark z-depth-1 mb-0">
                             <tbody>
                                 <tr>
                                     <td>Address length</td>
@@ -349,7 +383,7 @@
                         </table>
                     </div>
                     <div class="col-sm-4">
-                        <div class="statistics-chart p-3 z-depth-1">
+                        <div class="card statistics-chart p-3 z-depth-1">
                             <canvas id="pieChart"></canvas>
                         </div>
                     </div>

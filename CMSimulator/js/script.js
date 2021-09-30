@@ -647,7 +647,7 @@ function checkDirtyBit(line) {
 /**
  * Updates the dirty bit in the cache line
  * @param {HTMLTableRowElement} line line in the cache memory
- * @param {*} bit the new dirty bit
+ * @param {String} bit the new dirty bit
  */
 function updateDirtyBit(line, bit) {
     line.cells[2].innerHTML = bit;

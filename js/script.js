@@ -474,6 +474,7 @@ function loadStep() {
                 printSimStatus("The block is translated from main memory to cache memory.");
                 // Transfer block MM > CM
                 transferBlock(line, blockData);
+                if (checkDirtyBit(line) == 1) updateDirtyBit(line, 0);
                 // Update the tag
                 updateTag(line, tag);
                 // Update busy bit if it is 0

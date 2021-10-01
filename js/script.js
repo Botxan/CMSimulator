@@ -574,6 +574,11 @@ function storeStep() {
     }
 }
 
+function fastForward() {
+    step();
+    while(s != 0) step();
+}
+
 /* Removes all the highlighted stuff in the tables and enables the address input */
 function endOfSimulation() {
     printSimStatus("End of the operation. Submit another address to continue.");

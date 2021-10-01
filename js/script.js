@@ -69,18 +69,15 @@ var statChart = new Chart(ctxP, {
  * @returns Changes the submit button to reset. Starts form validtion
  */
 function onSubmit() {
+    disableForm();
     submitBtn = document.getElementById("submit");
     if(submitBtn.value == "submit") {
-        validateSetupForm();
         submitBtn.innerHTML = "reset";
         submitBtn.value = "reset";
         submitBtn.classList.replace("btn-default", "btn-danger");
-        disableForm();
+        validateSetupForm();
     } else {
         reset();
-        submitBtn.innerHTML = "submit";
-        submitBtn.value = "submit";
-        submitBtn.classList.replace("btn-danger", "btn-default");
     }
     return false;
 }
@@ -124,7 +121,6 @@ function validateSetupForm() {
     wpolicy = document.querySelector('input[name="wpolicy"]:checked').value;
     wrAlloc = document.querySelector('input[name="wrAlloc"]:checked').value;
     rpolicy = document.querySelector('input[name="rpolicy"]:checked').value;
-
     // Validate form
     if (mmsize % 2 != 0 || mmsize == undefined) {
         err += "The main memory size has to be power of 2.\n";
@@ -166,14 +162,13 @@ function validateSetupForm() {
         
         // Calculate address bits for cache memory and main memory address structure
         calcAddrBits(mmsize, cmsize, wperb, wsize);
-
         // Update CM table
         updateCMTable(0, 0, tagBits + "b");
         updateCMTable(0, 1, setBits + "b");
         updateCMTable(0, 2, wordBits + "b");
         updateCMTable(0, 3, byteBits + "b");
         
-        // Update MM table
+        // // Update MM table
         updateMMTable(0, 0, blockBits + "b");
         updateMMTable(0, 1, wordBits + "b");
         updateMMTable(0, 2, byteBits + "b");
@@ -181,7 +176,6 @@ function validateSetupForm() {
         printCalculations();
         buildCM();
         buildMM();
-        
         document.getElementById("address-input").focus();
         toggleAddrBtns();
     } else alert(err);

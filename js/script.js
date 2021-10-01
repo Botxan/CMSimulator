@@ -163,7 +163,7 @@ function validateSetupForm() {
 
         // Calculate time to transfer a block
         tBt = tMM + (wperb - 1) * tBuff;
-
+        
         // Calculate address bits for cache memory and main memory address structure
         calcAddrBits(mmsize, cmsize, wperb, wsize);
 
@@ -172,7 +172,7 @@ function validateSetupForm() {
         updateCMTable(0, 1, setBits + "b");
         updateCMTable(0, 2, wordBits + "b");
         updateCMTable(0, 3, byteBits + "b");
-
+        
         // Update MM table
         updateMMTable(0, 0, blockBits + "b");
         updateMMTable(0, 1, wordBits + "b");
@@ -181,6 +181,7 @@ function validateSetupForm() {
         printCalculations();
         buildCM();
         buildMM();
+        
         document.getElementById("address-input").focus();
         toggleAddrBtns();
     } else alert(err);
@@ -819,7 +820,7 @@ function removeSetHighlight() {
 }
 
 function removeContentHighlight(line) {
-    for (i = 0; i < wperb; i++) content.tBodies[0].rows[line.rowIndex-1].cells[i].style.backgroundColor = "#fff";
+    for (i = 0; i < wperb; i++) content.tBodies[0].rows[line.rowIndex-2].cells[i].style.backgroundColor = "#fff";
 }
 
 function removeMMBlockHighlight() {

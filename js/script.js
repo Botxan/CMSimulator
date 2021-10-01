@@ -813,7 +813,6 @@ function removeSetHighlight() {
 }
 
 function removeContentHighlight(line) {
-    console.log("Curr line: ", line);
     for (i = 0; i < wperb; i++) content.tBodies[0].rows[line.rowIndex-1].cells[i].style.backgroundColor = "#fff";
 }
 

@@ -293,7 +293,7 @@ function buildCM() {
         // // Content
         content.tHead.rows[0].cells[0].colSpan = wperb;
         row = content.tBodies[0].insertRow();
-        for (k = 0; k < lines; k++) row.insertCell().innerHTML = "-";
+        for (k = 0; k < wperb; k++) row.insertCell().innerHTML = "-";
     }
 }
 
@@ -813,6 +813,7 @@ function removeSetHighlight() {
 }
 
 function removeContentHighlight(line) {
+    console.log("Curr line: ", line);
     for (i = 0; i < wperb; i++) content.tBodies[0].rows[line.rowIndex-1].cells[i].style.backgroundColor = "#fff";
 }
 

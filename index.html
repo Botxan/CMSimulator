@@ -42,7 +42,7 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text md-addon">Cache memory</span>
                                 </div>
-                                <input type="number" id="cmsize" aria-label="Cache memory size" class="form-control" placeholder="2ⁿ bytes" value="256">
+                                <input type="number" id="cmsize" aria-label="Cache memory size" class="form-control" placeholder="2ⁿ bytes" value="128">
                                 <div class="input-group-append">
                                     <span class="input-group-text md-addon">B</span>
                                 </div>
@@ -57,7 +57,7 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text md-addon">Main memory</span>
                                 </div>
-                                <input type="number" id="mmsize" aria-label="Main memory size" class="form-control" placeholder="2ⁿ bytes" value="2048">
+                                <input type="number" id="mmsize" aria-label="Main memory size" class="form-control" placeholder="2ⁿ bytes" value="65536">
                                 <div class="input-group-append">
                                     <span class="input-group-text md-addon">B</span>
                                 </div>
@@ -101,11 +101,11 @@
                             <h6 class="mb-3">Placement policy</h6>                            
                             <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
                                 <label class="btn btn-primary active">
-                                    <input type="radio" name="ppolicy" autocomplete="off" value="directMap">
+                                    <input type="radio" name="ppolicy" autocomplete="off" value="directMap" checked>
                                     Direct-map
                                 </label>
                                 <label class="btn btn-primary">
-                                    <input type="radio" autocomplete="off" name="ppolicy" value="fullyAssociative" checked>
+                                    <input type="radio" autocomplete="off" name="ppolicy" value="fullyAssociative">
                                     Fully Associative
                                 </label>
                                 <label class="btn btn-primary">

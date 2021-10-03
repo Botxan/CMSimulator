@@ -603,7 +603,7 @@ function toBinary(n, fill) {
 function updateReplBits(line) {
     // Reduce replacement bits for the rest of lines with higher repl bits
     for (i = 0; i < nway; i++) {
-        if (set*nway+i-1 != line.rowIndex-1) {
+        if (set*nway+i != line.rowIndex-2) {
             currLine = set*nway+i;
             currLine = directory.rows[currLine];
             currLineReplBits = parseInt(currLine.cells[4].innerHTML, 2);
@@ -680,6 +680,7 @@ function getOldestLine() {
  * @param {String} block the data block
  */
 function transferBlock(line, block) {
+    console.log("Curr line:", line);
     for (i = 0; i < wperb; i++) {
         content.rows[line.rowIndex-1].cells[i].innerHTML = block[i];
     }

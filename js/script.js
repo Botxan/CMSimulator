@@ -680,7 +680,6 @@ function getOldestLine() {
  * @param {String} block the data block
  */
 function transferBlock(line, block) {
-    console.log("Curr line:", line);
     for (i = 0; i < wperb; i++) {
         content.rows[line.rowIndex-1].cells[i].innerHTML = block[i];
     }

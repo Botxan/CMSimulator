@@ -514,7 +514,7 @@ function storeStep() {
             } else { // write around case
                 if (wrAlloc == "writeAround") {
                     printSimStatus("The write policy is <b>" + wpolicy == "writeThrough" ? "write through" : "write back" + "</b> and "
-                    +  "<b>write on allocate</b>, so the block is going to be updated just in main memory.");
+                    +  "<b>write around</b>, so the block is going to be updated just in main memory.");
                     pTime += tMM;
                     tTime += tMM;
                     updateTimeRow(tMM);
@@ -536,6 +536,12 @@ function storeStep() {
                         updateDirtyBit(line, 1);
                         return step(); // write around with write on allocate
                     }
+                } else if(wpolicy == "writeThrough" && wrAlloc == "writeOnAllocate"){
+                    // First write on main memory
+                    printSimStatus("The write policy is <b>write through</b> and <b>write on allocate</b>, so the block is updated in main memory.")
+                    pTime += tMM;
+                    tTime += tMM;
+                    updateTimeRow(tMM);
                 } else endOfSimulation();
             }
             break;

@@ -532,20 +532,21 @@ function storeStep() {
                         tTime += tBt;
                         updateTimeRow(tBt);
                     }
-                    else return step(); // write around with write on allocate
+                    else  {
+                        updateDirtyBit(line, 1);
+                        return step(); // write around with write on allocate
+                    }
                 } else endOfSimulation();
             }
             break;
         case 6:
             if (hit) return step();
             else {
-                printSimStatus("The block is tranfered from main memory to cache memory.");
+                printSimStatus("The block is transfered from main memory to cache memory.");
                 // Transfer block MM > CM
                 transferBlock(line, blockData);
                 // Update the tag
                 updateTag(line, tag);
-                // Change dirty bit if it set to 1
-                if (checkDirtyBit(line) == 1) updateDirtyBit(line, 0);
                 // Update busy bit if it is 0
                 if (busyBit == 0) updateBusyBit(line, 1);
                     pTime += tBt;

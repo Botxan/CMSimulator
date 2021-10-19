@@ -614,8 +614,8 @@ function updateReplBits(line) {
             currLine = set*nway+i;
             currLine = directory.rows[currLine];
             currLineReplBits = parseInt(currLine.cells[4].innerHTML, 2);
-            // Check if replacement bits are higher than current line
-            if (currLineReplBits > parseInt(line.cells[4].innerHTML)) {
+            // Check if replacement bits are higher than  current line
+            if (currLineReplBits > parseInt(line.cells[4].innerHTML, 2)) {
                 currLine.cells[4].innerHTML = toBinary(currLineReplBits-1, Math.log2(nway));
             }
         }

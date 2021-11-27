@@ -1,628 +1,791 @@
-
+// Dom elements
+const instructionI = $("#instruction");
+const genRandAddrBtn = $("#genRandAddr");
+const sendBtn = $("#send");
+const breakdownT = $("#breakdown");
+const nextBtn = $("#next");
+const fastForwardBtn = $("#fastForward");
+const mmT = $("#mmTable > tbody:eq(0)");
+const calcTBody = $("#calcTable > tbody:eq(0)");
+const accessTT = $("#accessTimeTable > tbody:eq(0)");
+const hitMissRateTable = $("#hitMissRateTable > tbody:eq(0)");
 
 // Form values
-var cmsize, tCM, mmsize, tMM, tBuff, wsize, wperb, nwayInput, nway, ppolicy, wpolicy, wrAlloc, rpolicy, lines;
+var blsize, wsize, mmsize, tmm, tbuff, cmsize, tcm, ppolicy, nway, wpolicy, walloc, rpolicy;
+var validSetup = false;
 
 // Address structure bits
-var addrBits, byteBits, wordBits, blockBits, tagBits, lineBits, setBits;
-bitsByte = bitsWord = bitsBlock = bitsTag = bitsLine = bitsSet = 0;
+var brAddrBits, brByteBits, brWordBits, brBlockBits, brTagBits, brLineBits, brSetBits;
+brAddrBits = brByteBits = brWordBits = brBlockBits = brTagBits = brLineBits = brSetBits = 0;
 
-var addr, hit, line, busyBit, dirtyBit;
+var addr, line, hitLine, dirtyBit;
 
-// Bits of specific address
-var bitsB, bitsW, bitsBl, BitsT, bitsS;
-
-// Decimal values of address bits
-var byte, word, block, tag, set;
+// Binary address
+var binAddr;
+// Adress breakdown
+var byteBits, wordBits, blockBits, tagBits, setBits;
+// Decimal equivalences for each part of the breakdown
+var addr, byte, word, block, tag, set;
 
 // Operation
-var op
+var op;
+var stage = -1;
 var blockData = [];
-var s = 0;
 
 // Times
-var pTime = 0;
-var tTime = 0;
-var tBt;
+var tBt; // time to transfer a block from main memory to cache memory
+var pTime = 0; // partial time
+var tTime = 0; // total time
 
-// Address tables
-cmAddr = document.getElementById("CMAddr").tBodies[0];
-mmAddr = document.getElementById("MMAddr").tBodies[0];
+// Charts
+var hitMistRateChart;
+var hits = 0;
+var misses = 0;
+var accessTimeChart;
 
-// Cache memory and main memory tables
-var directory = document.getElementById("directory").tBodies[0];
-var content = document.getElementById("content");
-var mm = document.getElementById("mm");
+// Open setup sidenav
+openNav();
 
-// Enable "number of sets" field only in set-associative option
-var ppolicies = document.forms["setupForm"].elements["ppolicy"];
-for (ppolicy in ppolicies) {
-    ppolicies[ppolicy].onclick = function(e) {
-        let nwayInput = document.forms["setupForm"]["nway"];
-        if (ppolicies[2].checked) {
-            nwayInput.disabled = false;
-        } else {
-            nwayInput.disabled = true;
-        }
-    }
-}
-
-// Initialize statistics chart
-var ctxP = document.getElementById("pieChart").getContext('2d');
-var statChart = new Chart(ctxP, {
-    type: 'pie',
-    data: {
-        labels: ["Hit", "Miss"],
-        datasets: [{
-        data: [0, 0],
-        backgroundColor: ["#2ECC71", "#E74C3C"],
-        hoverBackgroundColor: ["#58D68D", "#EC7063"]
-    }]
-    },
-    options: {
-    responsive: true
-    }
+// Adds "Enter" key listener to instruction input
+instructionI.on("keypress", function (e) {
+	if (e.which == 13) processAddr();
 });
 
 /**
- * 
+ * Enables nway input
+ */
+function enableNway() {
+	let nway = $("[name='nway']");
+	if (nway.is(":disabled")) nway.prop("disabled", false);
+}
+
+/**
+ * Disables nway input
+ */
+function disableNway() {
+	let nway = $("[name='nway']");
+	if (!nway.is(":disabled")) nway.prop("disabled", true);
+}
+
+/**
+ * Opens the sidenav
+ */
+function openNav() {
+	$("#setupSidenav").css("transform", "translateX(0)");
+	$("#main").css({
+		opacity: ".6",
+		"pointer-events": "none",
+	});
+}
+
+/**
+ * Closes the sidenav
+ */
+function closeNav() {
+	if (validSetup === true) {
+		$("#setupSidenav").css("transform", "translateX(-580px)");
+		$("#main").css({
+			opacity: "1",
+			"pointer-events": "auto",
+		});
+	}
+}
+
+/**
  * @returns Changes the submit button to reset. Starts form validtion
  */
 function onSubmit() {
-    disableForm();
-    submitBtn = document.getElementById("submit");
-    if(submitBtn.value == "submit") {
-        submitBtn.innerHTML = "reset";
-        submitBtn.value = "reset";
-        submitBtn.classList.replace("btn-default", "btn-danger");
-        validateSetupForm();
-    } else {
-        reset();
-    }
-    return false;
+	submitBtn = $("#submit");
+	if (submitBtn.val() == "submit") {
+		// Validate form
+		valid = validateSetupForm();
+		if (valid) {
+			validSetup = true;
+			// Mark
+			// Disable setup form
+			disableForm();
+			// Change submit button to reset
+			submitBtn.html("reset").val("reset").removeClass("btn-default").addClass("btn-danger");
+			// Hide setup sidenav
+			closeNav();
+			// Setup simulator
+			setupSimulator();
+		}
+
+		// Else, reload the app
+	} else reset();
+
+	// Don't refresh the app on submit
+	return false;
 }
 
 /**
  * Disables the setup form
  */
 function disableForm() {
-    document.getElementById("sizes").style.pointerEvents = "none";
-    document.getElementById("ppolicy").style.pointerEvents = "none";
-    document.getElementById("wpolicy").style.pointerEvents = "none";
-    document.getElementById("rpolicy").style.pointerEvents = "none";   
-    document.getElementById("setup").style.backgroundColor = "rgba(112, 123, 124, .3)";
-    $("#setup > h1").css("opacity", ".5");
-    $('form[name="setupForm"]').children().not(".submit-wrapper").css("opacity", ".5");
-    $('input[type=number]').addClass('readonly');
+	// Disable whole form pointer-events -
+	$('form[name="setupForm"]').children().css("pointer-events", "none").not("#submit").css("opacity", ".5");
+
+	// - Except submit button
+	$("#submit").css("pointer-events", "auto");
 }
 
-/** Resets the app */
+/** Reload the app */
 function reset() {
-    location.reload();
+	location.reload();
 }
 
 /**
  * Setup form validation
  */
 function validateSetupForm() {
-    let err = "";
-    let valid = true;
+	let err = "";
+	let valid = true;
 
-    // Get form fields
-    mmsize = parseInt(document.forms["setupForm"]["mmsize"].value);
-    tCM = parseInt(document.forms["setupForm"]["tCM"].value);
-    cmsize = parseInt(document.forms["setupForm"]["cmsize"].value);
-    tMM = parseInt(document.forms["setupForm"]["tMM"].value);
-    tBuff = parseInt(document.forms["setupForm"]["tBuff"].value);
-    wsize = parseInt(document.forms["setupForm"]["wsize"].value);
-    wperb = parseInt(document.forms["setupForm"]["wperb"].value);
-    nwayInput = document.forms["setupForm"]["nway"];
-    ppolicy = document.querySelector('input[name="ppolicy"]:checked').value;
-    wpolicy = document.querySelector('input[name="wpolicy"]:checked').value;
-    wrAlloc = document.querySelector('input[name="wrAlloc"]:checked').value;
-    rpolicy = document.querySelector('input[name="rpolicy"]:checked').value;
-    // Validate form
-    if (mmsize % 2 != 0 || mmsize == undefined) {
-        err += "The main memory size has to be power of 2.\n";
-        valid = false;
-    }
+	// Get form fields
+	blsize = parseInt($("#blsize").val());
+	wsize = parseInt($("#wsize").val());
 
-    if (cmsize % 2 != 0 || cmsize == undefined) {
-        err += "The cache memory size has to be power of 2.\n";
-        valid = false;
-    }
+	mmsize = parseInt($("#mmsize").val());
+	tmm = parseInt($("#tmm").val());
+	tbuff = parseInt($("#tbuff").val());
+	cmsize = parseInt($("#cmsize").val());
+	tcm = parseInt($("#tcm").val());
 
-    if (cmsize > mmsize) {
-        err += "The cache memory can not be bigger than the main memory.\n";
-        valid = false;
-    }
+	ppolicy = $('input[name="ppolicy"]:checked').val();
+	nway = parseInt($("#nway").val());
 
-    if (Number.isNaN(wsize)) {
-        err += "Choose a word size.\n";
-        valid = false;
-    }
+	wpolicy = $('input[name="wpolicy"]:checked').val();
+	walloc = $('input[name="walloc"]:checked').val();
 
-    if (wsize > cmsize || wsize > mmsize) {
-        err += "The word size cannot be bigger than main memory size or cache memory size.\n";
-        valid = false;
-    }
+	rpolicy = $('input[name="rpolicy"]:checked').val();
 
-    if (Number.isNaN(wperb)) {
-        err += "Choose words per block.\n";
-        valid = false;
-    }
-    
-    if (valid) {
-        // Calculate n-way the selected placement policy
-        nway = calcNWay(ppolicy, cmsize, wperb, wsize);
-        nwayInput.value = nway;
+	// ***** Input validations *****
 
-        // Calculate time to transfer a block
-        tBt = tMM + (wperb - 1) * tBuff;
-        
-        // Calculate address bits for cache memory and main memory address structure
-        calcAddrBits(mmsize, cmsize, wperb, wsize);
-        // Update CM table
-        updateCMTable(0, 0, tagBits + "b");
-        updateCMTable(0, 1, setBits + "b");
-        updateCMTable(0, 2, wordBits + "b");
-        updateCMTable(0, 3, byteBits + "b");
-        
-        // // Update MM table
-        updateMMTable(0, 0, blockBits + "b");
-        updateMMTable(0, 1, wordBits + "b");
-        updateMMTable(0, 2, byteBits + "b");
+	// Block size must be power of two
+	if (((blsize & (blsize - 1)) != 0) | Number.isNaN(blsize)) {
+		err += "Block size has to be power of 2.\n";
+		valid = false;
+	}
 
-        printCalculations();
-        buildCM();
-        buildMM();
-        document.getElementById("address-input").focus();
-        toggleAddrBtns();
-    } else alert(err);
+	// Word size must be power of two
+	if (((wsize & (wsize - 1)) != 0) | Number.isNaN(wsize)) {
+		err += "Word size has to be power of 2.\n";
+		valid = false;
+	}
 
-    // console.log("Form values:\n" + "Cache memory size: " + cmsize + ".\nCache memory access time; " + tCM
-    //     + ".\nMain memory size: " + mmsize + ".\nMain memory access time: " + tMM
-    //     + ".\nInterleaving buffer access time: " + tBuff + ".\nWord size: " + wsize
-    //     + ".\nWords per block: " + wperb + ".\nN-way: " + nway + ".\nPlacement policy: "+ ppolicy
-    //     + ".\nWriting policy: " + wpolicy + ".\nWriting allocation: " + wrAlloc
-    //     + ".\nReplacement policy: " + rpolicy + "."
-    // );
+	// MM size must be power of two and can not be empty
+	if ((mmsize & (mmsize - 1)) != 0 || Number.isNaN(mmsize)) {
+		err += "Main memory size has to be power of 2.\n";
+		valid = false;
+	}
+
+	// MM access time can not be empty
+	if (Number.isNaN(tmm)) {
+		err += "Access time for main memory must be specified.\n";
+		valid = false;
+	}
+
+	// Interleaving buffers access time can not be empty
+	if (Number.isNaN(tbuff)) {
+		err += "Buffer access time must be specified.\n";
+		valid = false;
+	}
+
+	// CM size must be power of two and can not be empty
+	if ((cmsize & (cmsize - 1)) != 0 || Number.isNaN(cmsize)) {
+		err += "Cache memory size has to be power of 2.\n";
+		valid = false;
+	}
+
+	// CM access time can not be empty
+	if (Number.isNaN(tcm)) {
+		err += "Access time for cache memory must be specified.\n";
+		valid = false;
+	}
+
+	// CM size can not be bigger than MM size
+	if (cmsize > mmsize) {
+		err += "Cache memory can not be bigger than the main memory.\n";
+		valid = false;
+	}
+
+	// Word size must be smaller than MM and CM sizes
+	if (wsize > cmsize || wsize > mmsize) {
+		err += "Word size must be smaller than cache memory and main memory sizes.\n";
+		valid = false;
+	}
+
+	// Nway must be specified in case of set associative
+
+	if (ppolicy == "setAssociative" && ((nway != 2 && nway != 4) || isNaN(nway))) {
+		err += "Nway must be specified in case of set-associative and must be 2 or 4.\n";
+		valid = false;
+	}
+
+	// If form is valid, Calculate corresponding Nway
+	if (valid) {
+		nway = calcNWay(ppolicy, cmsize, blsize, wsize);
+		$("#nway").val(nway);
+	}
+	// Otherwise alert errors
+	else alert(err);
+
+	// console.log("Block size (words): " + blsize + ".\nWord size: " + wsize
+	//     + ".\n\nMain memory size: " + mmsize + ".\nMain memory access time: " + tmm
+	//     + ".\nInterleaving buffer access time: " + tbuff
+	//     + ".\n\nCache memory size: " + cmsize + ".\nCache memory access time: " + tcm
+	//     + ".\n\nPlacement policy: "+ ppolicy + ".\nN-way: " + nway
+	//     + ".\n\nWriting policy: " + wpolicy + ".\nWriting allocation: " + walloc
+	//     + ".\n\nReplacement policy: " + rpolicy + "."
+	// );
+
+	return valid;
 }
 
 /**
  * Calculates the number of sets depending on placement policy
  * @param {string} ppolicy placement policy
  * @param {number} cmsize cache size
- * @param {number} wperb words/lines per block
+ * @param {number} blsize size of the block (words)
  * @param {number} wsize size(bytes) per word
  * @returns number of block
  */
-function calcNWay(ppolicy, cmsize, wperb, wsize) {
-    let nway;
-    switch (ppolicy) {
-        case "directMap":
-            // one line = one set
-            nway = 1;
-            break;
-        case "fullyAssociative":
-            // same as number of lines
-            nway = parseInt(cmsize / (wperb * wsize));
-            break;
-        case "setAssociative":
-            // the input introduced by the user
-            nway = parseInt(window.nwayInput.value);
-            break;
-    }
-    return nway;
+function calcNWay(ppolicy, cmsize, blsize, wsize) {
+	let nway;
+	switch (ppolicy) {
+		case "directMap":
+			// one line = one set
+			nway = 1;
+			break;
+		case "fullyAssociative":
+			// same as number of lines
+			nway = cmsize / (blsize * wsize);
+			break;
+		case "setAssociative":
+			// the input introduced by the user
+			nway = parseInt($("#nway").val());
+			break;
+	}
+	return nway;
 }
 
 /**
- * Calculates corresponding bits for each part of main memory and cache memory addresses
+ * Set up simulator when cache and main memory parameters are valid
+ */
+function setupSimulator() {
+	// Calculate time to transfer a block
+	tBt = tmm + (blsize - 1) * tbuff;
+
+	// address breakdown
+	calcAddressBreakdown(mmsize, cmsize, blsize, wsize);
+
+	// Update address breakdown table
+	updateBreakdownTable(brTagBits + "b", brSetBits + "b", brWordBits + "b", brByteBits + "b");
+
+	// Prints breakdown calculations in the corresponding element
+	calcTBody.find("tr:eq(0) > td:eq(1)").html("Log₂(" + mmsize + ") = " + brAddrBits + " bits");
+	calcTBody.find("tr:eq(1) > td:eq(1)").html("Log₂(" + wsize + ") = " + brByteBits + " bits");
+	calcTBody.find("tr:eq(2) > td:eq(1)").html("Log₂(" + blsize + ") = " + brWordBits + " bits");
+	calcTBody.find("tr:eq(3) > td:eq(1)").html(brAddrBits + " - (" + brWordBits + " + " + brByteBits + ") = " + brBlockBits + " bits");
+	calcTBody.find("tr:eq(4) > td:eq(1)").html("Log₂(" + lines + ") = " + brLineBits + " bits");
+	calcTBody.find("tr:eq(5) > td:eq(1)").html("Log₂(" + lines + " / " + nway + ") = " + brSetBits + " bits");
+	calcTBody.find("tr:eq(6) > td:eq(1)").html(brBlockBits + " - " + brSetBits + " = " + brTagBits + " bits");
+
+	// Draw cache memory table/s
+	buildCM();
+
+	// Draw main memory table
+	buildMM();
+
+	// Focus address input
+	instructionI.focus();
+
+	// Setup access times chart
+	setupAccessTimeChart();
+
+	// Setup hit/miss rate chart
+	setupHitMissRateChart();
+
+	// Toggle simulator controls
+	toggleSimBtns();
+}
+
+/**
+ * Calculates breakdown bits
  * @param {number} mmsize
  * @param {number} cmsize
- * @param {number} wperb
+ * @param {number} blsize
  * @param {number} wsize
  */
-function calcAddrBits(mmsize, cmsize, wperb, wsize) {
-    // Number of bits for whole address = log2(main memory size in bytes)
-    addrBits = Math.log2(mmsize); 
-    // Bits to identify byte in a word = log2(word size in bytes)
-    byteBits = Math.log2(wsize);
-    // Bits to identify a word in a block = log2(words per block)
-    wordBits = Math.log2(wperb);
-    // Bits to identify a block in the memory = 
-    // whole address bits - bits for word in block - bits for byte in word
-    blockBits = addrBits - (wordBits + byteBits);
-    // Number of lines in cache = cache size / (words per block * word size in bytes)
-    // or cache size / (bytes per block)
-    lines = cmsize / (wperb * wsize);
-    // Bits to identify a line in cache memory = log2(number of lines)
-    lineBits = Math.log2(lines);
-    // Bits to identify the corresponding set for a block = log2(number of lines / nway)
-    setBits = Math.log2(lines / nway);
-    // Bits to identify the tag = bits for the whole block - bits for the set
-    tagBits = blockBits - setBits;
-    // console.log("Bits:" + "\nTotal number of bits in address: " + addrBits + ".\nByte in a word: " + byteBits
-    //     + ".\nWord in a block: " + wordBits + ".\nBlock: " + blockBits + ".\nLine: " + lineBits
-    //     + ".\nsetBits: " + setBits + ".\ntagBits: " + tagBits);
+function calcAddressBreakdown(mmsize, cmsize, blsize, wsize) {
+	// Number of bits for whole address = log2(main memory size in bytes)
+	brAddrBits = Math.log2(mmsize);
+	// Bits to identify byte in a word = log2(word size in bytes)
+	brByteBits = Math.log2(wsize);
+	// Bits to identify a word in a block = log2(words per block)
+	brWordBits = Math.log2(blsize);
+	// Bits to identify a block in the memory =
+	// whole address bits - bits for word in block - bits for byte in word
+	brBlockBits = brAddrBits - (brWordBits + brByteBits);
+	// Number of lines in cache = cache size / (words per block * word size in bytes)
+	// or cache size / (bytes per block)
+	lines = cmsize / (blsize * wsize);
+	// Bits to identify a line in cache memory = log2(number of lines)
+	brLineBits = Math.log2(lines);
+	// Bits to identify the corresponding set for a block = log2(number of lines / nway)
+	brSetBits = Math.log2(lines / nway);
+	// Bits to identify the tag = bits for the whole block - bits for the set
+	brTagBits = brBlockBits - brSetBits;
+	// console.log("Bits:" + "\nTotal number of bits in address: " + addrBits + ".\nByte in a word: " + byteBits
+	//     + ".\nWord in a block: " + wordBits + ".\nBlock: " + blockBits + ".\nLine: " + lineBits
+	//     + ".\nsetBits: " + setBits + ".\ntagBits: " + tagBits);
 }
 
-function updateCMTable(row, cell, val) {
-    cmAddr.rows[row].cells[cell].innerHTML = val;
-}
-
-function updateMMTable(row, cell, val) {
-    mmAddr.rows[row].cells[cell].innerHTML = val;
-}
-
-function printCalculations() {
-    calcTable = document.getElementById("calcTable").tBodies[0];
-    calcTable.rows[0].cells[1].innerHTML = "Log₂(" + mmsize + ") = " + addrBits + " bits";
-    calcTable.rows[1].cells[1].innerHTML = "Log₂(" + wsize + ") = " + byteBits + " bits";
-    calcTable.rows[2].cells[1].innerHTML = "Log₂(" + wperb + ") = " + wordBits + " bits";
-    calcTable.rows[3].cells[1].innerHTML = addrBits + " - (" + wordBits + " + " + byteBits + ") = " + blockBits + " bits.";
-    calcTable.rows[4].cells[1].innerHTML = "Log₂(" + lines + ") = " + lineBits + " bits.";
-    calcTable.rows[5].cells[1].innerHTML = "Log₂(" + lines + " / " + nway + ") = " + setBits + " bits";
-    calcTable.rows[6].cells[1].innerHTML = blockBits +  " - " + setBits + " = " + tagBits + " bits.";
+/**
+ * Updates the content of the breakdown table
+ * @param {*} row table row
+ * @param {*} cell table cell
+ * @param {*} val new value
+ */
+function updateBreakdownTable(tag, set, word, byte) {
+	row = "#breakdown > tbody > tr:eq(0) > ";
+	$(row + "td:eq(0)").html(tag);
+	$(row + "td:eq(1)").html(set);
+	$(row + "td:eq(2)").html(word);
+	$(row + "td:eq(3)").html(byte);
 }
 
 /**
  * Draws the cache memory on the screen
  */
 function buildCM() {
-    let row;
+	let cmtables = $("#cmTables");
+	let sets = 1;
+	if (ppolicy == "setAssociative") sets = nway;
 
-    // Empty in case there was previous data
-    directory.innerHTML = "";
-    content.tBodies[0].innerHTML = "";
-
-    for (i = 0; i < lines; i++) {
-        
-        // Directory
-        row = directory.insertRow();
-        row.insertCell().innerHTML = Math.floor(i / nway);
-        for (j = 0; j < 2; j++) row.insertCell().innerHTML = 0;
-        row.insertCell().innerHTML = "-";
-        row.insertCell().innerHTML = toBinary(i % nway, Math.log2(nway));
-
-        // // Content
-        content.tHead.rows[0].cells[0].colSpan = wperb;
-        row = content.tBodies[0].insertRow();
-        for (k = 0; k < wperb; k++) row.insertCell().innerHTML = "-";
-    }
+	// Create as many tables as sets
+	for (i = 0; i < sets; i++) {
+		// Create table for set
+		let wrapper = $("<div>").addClass("table-wrapper col-" + 12 / sets);
+		let table = $("<table>")
+			.attr("id", "way-" + i)
+			.addClass("table table-bordered table-sm text-center z-depth-1");
+		table.append("<thead><tr><th>set</th><th>valid</th><th>dirty</th><th>tag</th><th>repl</th><th colspan='" + blsize + "'>block</th></thead>");
+		table.append("<tbody>");
+		// Lines per set
+		for (j = 0; j < lines / sets; j++) {
+			table.append(
+				"<tr><td>" +
+					(ppolicy == "fullyAssociative" ? "-" : j) +
+					"</td><td>0</td><td>0</td><td>-</td><td>" +
+					(rpolicy === "random" ? "-" : ppolicy == "fullyAssociative" ? toPaddedBinary(j, Math.log2(nway)) : ppolicy == "setAssociative" ? toPaddedBinary(i, Math.log2(nway)) : "-") +
+					"</td>" +
+					new Array(blsize + 1).join("<td>-</td>") +
+					"</tr>"
+			);
+		}
+		table.append("</tbody>");
+		wrapper.append(table);
+		cmtables.append(wrapper);
+	}
 }
 
-/** Draws the main memory on the screen */
+/**
+ * Draws the main memory on the screen
+ */
 function buildMM() {
-    let blSize = wperb * wsize;
-    let row;
+	let row;
 
-    // Empty in case there was previous data
-    mm.tBodies[0].innerHTML = "";
-
-    mm.tHead.rows[0].cells[0].colSpan = wperb;
-
-    // Block per row
-    for (i = 0; i < mmsize / blSize; i++) {
-        row = mm.tBodies[0].insertRow();
-        for (j = 0; j < wperb; j++) {
-            row.insertCell().innerHTML = "B" + i + "W" + j;
-        }
-    }
+	// Block per row
+	for (i = 0; i < mmsize / (blsize * wsize); i++) {
+		row = "<tr>";
+		for (j = 0; j < blsize; j++) row += "<td>B" + i + "W" + j + "</td>";
+		row += "</tr>";
+		mmT.append(row);
+	}
 }
-
 /**
  * Returns a random valid address (byte)
  */
 function getRandomAddr() {
-    let address = document.getElementById("address-input");
-    address.value = Math.floor(Math.random() * (mmsize));
+	instructionI.val(Math.floor(Math.random() * mmsize));
 }
 
 /**
  * Checks if the input address is valid
  */
-function isValidAddr() {
-    addr = parseInt(document.getElementById('address-input').value);
-    return addr < mmsize;
+function isValidAddr(addr) {
+	return addr < mmsize && addr >= 0;
 }
 
 /**
  * Takes the addr, separates it in bits and updates the address tables with the obtained values
  */
 function processAddr() {
-    op = document.querySelector('input[name="operation"]:checked').value;
-    binAddr = toBinary(addr, addrBits);
+	// Validate input address
+	addr = parseInt(instructionI.val());
+	if (!isValidAddr(addr)) {
+		alert("The address is not valid");
+		return false;
+	}
 
-    bitsB = binAddr.substring(binAddr.length - byteBits);  
-    byte = parseInt(bitsB, 2);
+	// Disable address controls
+	toggleAddrBtns();
+	// Enable simulator controls
+	toggleSimBtns();
 
-    bitsW = binAddr.substring(binAddr.length - (wordBits+byteBits), binAddr.length - byteBits);
-    word = parseInt(bitsW, 2);
-    
-    bitsBl = binAddr.substring(0, blockBits);
-    block = parseInt(bitsBl, 2);
+	// Get operation (st or ld)
+	op = $("#op").val();
 
-    bitsT = binAddr.substring(0, tagBits);
-    tag = parseInt(bitsT, 2);
+	// Convert address to binary and split it in breakdown table
+	binAddr = toPaddedBinary(addr, brAddrBits);
 
-    bitsS = binAddr.substring(tagBits, tagBits + setBits);
-    if (bitsS == "") set = 0; // fully associative has not bits for set
-    else set = parseInt(bitsS, 2);
+	byteBits = binAddr.substring(binAddr.length - brByteBits);
+	byte = parseInt(byteBits, 2);
 
-    // Obtain block data
-    for (i = 0; i < wperb; i++) blockData[i] = mm.tBodies[0].rows[block].cells[i].innerHTML;
+	wordBits = binAddr.substring(binAddr.length - (brWordBits + brByteBits), binAddr.length - brByteBits);
+	word = parseInt(wordBits, 2);
 
-    // Update CM address table with binary address
-    updateCMTable(0, 0, bitsT);
-    updateCMTable(0, 1, bitsS);
-    updateCMTable(0, 2, bitsW);
-    updateCMTable(0, 3, bitsB);
+	blockBits = binAddr.substring(0, brBlockBits);
+	block = parseInt(blockBits, 2);
 
-    // // Update MM address table with binary address
-    updateMMTable(0, 0, bitsBl);
-    updateMMTable(0, 1, bitsW);
-    updateMMTable(0, 2, bitsB);
-}
+	tagBits = binAddr.substring(0, brTagBits);
+	tag = parseInt(tagBits, 2);
 
-/** Check if there has been a hit or miss */
-function checkHit() {
-    // Find line into set
-    hit = false;
-    busyBit;
-    let oldTag;
-    for (i = 0; i < nway; i++) {
-        line = directory.rows[set*nway+i];
-        oldTag = line.cells[3].innerHTML;
-        busyBit = line.cells[1].innerHTML;
-        // If busy bit is one and tags are the same
-        if (busyBit == 1 && oldTag == toBinary(tag, tagBits)) {
-            hit = true;
-            break;
-        }
-    }
+	setBits = binAddr.substring(brTagBits, brTagBits + brSetBits);
+	if (setBits === "") {
+		// fully associative
+		set = 0;
+		setBits = "-";
+	} else set = parseInt(setBits, 2);
+
+	// Obtain block data
+	for (i = 0; i < blsize; i++) blockData[i] = mmT.find("tr:eq(" + block + ") > td:eq(" + i + ")").html();
+
+	// Update CM address table with binary address
+	updateBreakdownTable(tagBits, setBits, wordBits, byteBits);
+
+	// Clear access time table
+	accessTT.find("tr:eq(0) > td:eq(0)").html("");
+	accessTT.find("tr:eq(0) > td:eq(1)").html("");
+
+	// Reset partial time
+	pTime = 0;
+
+	// Begin simulation
+	stage++;
+	step();
 }
 
 /**
- * Goes to the next step in the simulation
+ * Displays the next step in the simulation
  */
 function step() {
-    if (!isValidAddr(addr)) return alert("Invalid address");
-    if (s == 0) {
-        // Cycles per instruction are reseted
-        pTime = 0;
-        toggleAddrBtns();
-        toggleSimControls();
-        createTimeRow();
-    }
-    // Go to next step
-    s++;
-    let ins = document.querySelector('input[name="operation"]:checked').value;
-    if (s > 3) {
-        if (ins == "ld") loadStep();
-        else storeStep();
-    } generalStep();
-}
+	switch (stage) {
+		case 0: // Begin simulation
+			ptime = 0;
+			// createTimeRow();
+			simMsg("The address <b>" + addr + "</b>" + " is converted to binary <b>" + binAddr + "</b>. Instruction breakdown is displayed.");
+			break;
 
-// Steps to follow in any case
-function generalStep() {
-    switch(s) {
-        case 1: // Read address and separate and split it in corresponding bits
-            processAddr();
-            printSimStatus("The address <b>" + addr + "</b>" + 
-            " is converted to binary <b>" + binAddr + 
-            "</b> and separated into corresponding bits within the address.");
-            highlightMMBlock("rgba(93, 173, 226, .5)");
-            break;
+		case 1: // Access cache memory. Compare valid bit and tag.
+			addTime(tcm);
+			updateAccessTT(tcm);
+			switch (ppolicy) {
+				case "directMap":
+					simMsg("Placement policy is direct map. Valid bit and tag are compared in the corresponding line.");
+					break;
+				case "fullyAssociative":
+					simMsg("Placement policy is fully associative. Valid bit and tag are compared with every line of the directory.");
+					break;
+				case "setAssociative":
+					simMsg("Placement policy is set associative. Valid bit and tag are compared with every line of the corresponding set.");
+					break;
+			}
+			break;
 
-        case 2: // Compare busy bit and tag
-            printSimStatus("For every line, check if busy bit is 1 and tags are equal.");    
-            removeMMBlockHighlight();       
-            highlightSet("#F9E79F");
-            highlightBusyBit("#F1C40F");
-            highlightTag("#F1C40F");
-            pTime = tCM;
-            tTime += tCM;
-            updateTimeRow(tCM);
-            break;
+		case 2: // Resolve hit or miss and obtain the target line/block
+			hit = isHit();
+			if (hit) {
+				simMsg("A line with valid bit to 1 and matching tag has been found, so it is a cache <b>hit</b>.", "rgba(88, 214, 141, 0.5)");
+				line = hitLine;
+				validBit = line.find("td:eq(1)").html();
+			} else {
+				simMsg("Since there is not a line with the valid bit to 1 and same tag, it is a cache <b>miss</b>.", "rgba(236, 112, 99, 0.5)");
+				line = rpolicy === "random" && ppolicy != "directMap" ? getRandomLine() : getOldestLine();
+				validBit = line.find("td:eq(1)").html();
+			}
+			updateHitMissRateChart(hit);
+			break;
 
-        case 3: // Resolve hit or miss
-            checkHit();
-            if (hit) {
-                addHit();
-                printSimStatus("A line with busy bit to 1 and matching tag has been found, so it is a cache <b>hit</b>.", "rgba(88, 214, 141, .5)");
-                highlightLine(line, "rgba(88, 214, 141, .5)");
-            } else {
-                addMiss();
-                printSimStatus("Since there is not a line with the busy bit to 1 and same tag, it is a cache <b>miss</b>.", "rgba(236, 112, 99, .5)");
-                highlightSet("rgba(236, 112, 99, .5)")
-                // get line depending on replacement policy
-                if (rpolicy == "no") { // Update random line
-                    let randLine = Math.floor(Math.random() * (set*nway+nway - set*nway) + set*nway);
-                    line = directory.rows[randLine];
-                } else line = getOldestLine();
-            }
-            break;
-    }
+		case 5: // Apply replacement policy
+			// Hit&lru, miss&(lru|fifo)
+			if (ppolicy != "directMap" && rpolicy != "random" && ((hitLine && rpolicy === "lru") || (!hitLine && (rpolicy === "lru" || rpolicy === "fifo")))) {
+				updateReplBits(line);
+				simMsg("Replacement bits are updated according to <b>" + rpolicy.toUpperCase() + "</b> policy.");
+			} else {
+				stage++;
+				return step();
+			}
+			break;
+
+		case 6:
+			endOfSimulation();
+			break;
+
+		default:
+			// After hit or miss, depends on op
+			op == "ld" ? loadStep() : storeStep();
+			break;
+	}
 }
 
 // Steps to follow in case of load (read) instruction
 function loadStep() {
-    switch (s) {
-        case 4: // hit => Fetch block. Miss => if dirty == 1 transfer block CM > MM
-            removeContentHighlight(line);
-            if (hit) {
-                printSimStatus("The block is fetched from cache memory.", "#fff");
-            } else {
-                // Check dirty bit for next step;
-                if (line.cells[2].innerHTML == 0) return step();
-                printSimStatus("Dirty bit is <b>1</b>, so the block is transfered from cache memory to main memory.");
-                pTime += tBt;
-                tTime += tBt;
-                updateTimeRow(tBt);
-            }
-            break;
+	switch (stage) {
+		case 3: // HIT => Fetch Block (/)  MISS => Check dirty block
+			if (hit) {
+				msg = "Block is directly updated in the cache memory. ";
+				if (!isDirty(line)) {
+					msg += "The dirty bit is set to 1.";
+					updateDirtyBit(line, 1);
+				}
+				simMsg(msg);
+			} else {
+				if (isDirty(line)) {
+					simMsg("The block to be replaced is dirty, so it is transfered to the main memory.");
+					addTime(tBt);
+					updateAccessTT(tBt);
+				} else {
+					stage++;
+					return step();
+				}
+			}
+			break;
 
-        case 5: // (miss) Block transfer MM > CM
-            if (hit) return step();
-            else {
-                printSimStatus("The block is translated from main memory to cache memory.");
-                // Transfer block MM > CM
-                transferBlock(line, blockData);
-                if (checkDirtyBit(line) == 1) updateDirtyBit(line, 0);
-                // Update the tag
-                updateTag(line, tag);
-                // Update busy bit if it is 0
-                if (busyBit == 0) updateBusyBit(line, 1);
-                pTime += tBt;
-                tTime += tBt;
-                updateTimeRow(tBt);
-            }
-            break;
+		case 4: // HIT => go to replacement policy stage  MISS => Transfer block andupdate dirty|valid bit/s
+			msg = "";
+			if (hit) {
+				stage++;
+				return step();
+			} else {
+				msg = "The block is transfered from main memory to cache memory. ";
+				if (isDirty(line)) msg += "Dirty bit is updated to 0. ";
+				simMsg(msg);
+				transferBlock(line, blockData);
 
-        case 6: // Apply replacement policy
-            if (ppolicy == "directMap") return step();
-            // If hit and lru or miss and lru|fifo => change replacement bits
-            let replace = (hit && rpolicy == "lru") || (!hit && (rpolicy == "lru" | rpolicy == "fifo")) ? true : false;
-            if (replace) {
-                highlightReplacementBits("#3498DB", "#85C1E9");
-                updateReplBits(line);
-                printSimStatus("Replacement bits are updated according to replacement policy <b>" + rpolicy + "</b>.");
-            } else return step();
-            break;
-        case 7:
-            endOfSimulation();
-            break;
-    }
+				addTime(tBt);
+				updateAccessTT(tBt);
+
+				if (isDirty(line)) updateDirtyBit(line, 0);
+				updateTag(line, tag);
+				if (validBit == 0) updateValidBit(line, 1);
+			}
+			break;
+	}
 }
 
 // Steps to follow in case of store (write) instruction
 function storeStep() {
-    switch(s) {
-        case 4:
-            if (hit) {
-                if (wpolicy == "writeBack") {
-                    printSimStatus("Write policy is <b>write back</b>, so dirty bit is set to <b>1</b>.");
-                    updateDirtyBit(line, 1);
-                    highlightDirtyBit("#229954");
-                } else { // write through
-                    printSimStatus("Block in main memory is updated");
-                    pTime += tMM;
-                    tTime += tMM;
-                    updateTimeRow(tMM);
-                }
-            } else { // write around case
-                if (wrAlloc == "writeAround") {
-                    printSimStatus("The write policy is <b>" + wpolicy == "writeThrough" ? "write through" : "write back" + "</b> and "
-                    +  "<b>write around</b>, so the block is going to be updated just in main memory.");
-                    pTime += tMM;
-                    tTime += tMM;
-                    updateTimeRow(tMM);
-                } else return step();
-            }
-            break;
+	switch (stage) {
+		case 3:
+			// HIT => (WriteBack > update dirty bit) | (WriteThrough > update main memory block)
+			// MISS => (Write around general case) | (Write on allocate - Write Back transifer CM->MM if dirty bit == 1)
+			if (hit) {
+				if (wpolicy === "writeBack") {
+					simMsg("Write policy is <b>Write Back</b>, so dirty bit is set to <b>1</b>.");
+					updateDirtyBit(line, 1);
+				} else {
+					// write through
+					simMsg("Block in main memory is updated.");
+					addTime(tMM);
+					updateAccessTT(tMM);
+				}
+			} else {
+				// write around case: only main memory is updated
+				if (walloc === "writeAround") {
+					simMsg(
+						"The write policy is <b>" +
+							(wpolicy == "writeThrough" ? "Write Through" : "Write Back") +
+							"</b> with <b>Write Around</b>, so the block is going to be updated just in main memory."
+					);
+					addTime(tMM);
+					updateAccessTT(tMM);
+					stage = 5; // En of simulation
+				} else {
+					// write on allocate
+					if (wpolicy === "writeBack" && isDirty(line)) {
+						simMsg("The dirty bit is equal to 1, so the previously updated block is transferred from cache memory to main memory.");
+						addTime(tBt);
+						updateAccessTT(tBt);
+					} else {
+						stage++;
+						return step();
+					}
+				}
+			}
+			break;
 
-        case 5:
-            if (hit) return step();
-            else {
-                if (wpolicy == "writeBack" && wrAlloc == "writeOnAllocate") {
-                    if (checkDirtyBit(line) == 1) {
-                        printSimStatus("The write policy is <b>write back</b> and <b>write on allocate</b>. The dirty bit is equal to 1, so the block is transferred from cache memory to main memory.");
-                        pTime += tBt;
-                        tTime += tBt;
-                        updateTimeRow(tBt);
-                    }
-                    else  {
-                        updateDirtyBit(line, 1);
-                        return step(); // write around with write on allocate
-                    }
-                } else if(wpolicy == "writeThrough" && wrAlloc == "writeOnAllocate"){
-                    // First write on main memory
-                    printSimStatus("The write policy is <b>write through</b> and <b>write on allocate</b>, so the block is updated in main memory.")
-                    pTime += tMM;
-                    tTime += tMM;
-                    updateTimeRow(tMM);
-                } else endOfSimulation();
-            }
-            break;
-        case 6:
-            if (hit) return step();
-            else {
-                printSimStatus("The block is transfered from main memory to cache memory.");
-                // Transfer block MM > CM
-                transferBlock(line, blockData);
-                // Update the tag
-                updateTag(line, tag);
-                // Update busy bit if it is 0
-                if (busyBit == 0) updateBusyBit(line, 1);
-                    pTime += tBt;
-                    tTime += tBt;
-                    updateTimeRow(tBt);
-            }
-            break;
-        case 7: // Apply replacement policy
-            if (ppolicy == "directMap") return step();
-            // If hit and lru or miss and lru|fifo => change replacement bits
-            let replace = (hit && rpolicy == "lru") || (!hit && (rpolicy == "lru" | rpolicy == "fifo")) ? true : false;
-            if (replace) {
-                highlightReplacementBits("#3498DB", "#85C1E9");
-                updateReplBits(line);
-                printSimStatus("Replacement bits are updated according to replacement policy <b>" + rpolicy + "</b>.");
-            } else return step();
-            break;
-        case 8:
-            endOfSimulation();
+		case 4:
+			if (hit) {
+				stage++;
+				return step();
+			} else {
+				// write on allocate
+				if (wpolicy === "writeBack") {
+					simMsg("The requested block is transfered from main memory to cache memory. New data is writen into the cache block. Dirty bit is set to 1.");
+					updateDirtyBit(line, 1);
+				} else simMsg("The block is updated in the main memory. Then, it is transfered to the cache memory.");
+				// Transfer block MM > CM
+				transferBlock(line, blockData);
+				// Update the tag
+				updateTag(line, tag);
+				// Update valid bit if it is 0
+				if (validBit == 0) updateValidBit(line, 1);
 
-    }
+				addTime(tBt);
+				updateAccessTT(tBT);
+			}
+			break;
+	}
 }
 
 function fastForward() {
-    step();
-    while(s != 0) step();
+	while (stage != -1) {
+		stage++;
+		step();
+	}
 }
 
 /* Removes all the highlighted stuff in the tables and enables the address input */
 function endOfSimulation() {
-    printSimStatus("End of the operation. Submit another address to continue.");
-    s = 0;
-    removeSetHighlight();
-    removeContentHighlight(line);
-    removeMMBlockHighlight();
-    updateTimeRowWithPartial();
-    toggleAddrBtns();
-    toggleSimControls();
+	// Print end of simulation message
+	simMsg("End of the operation. Submit another address to continue.");
+
+	// Update the access time chart
+	updateAccessTimeChart(pTime);
+
+	// Print total times in access time table
+	timeSum = accessTT.find("tr:eq(0) > td:eq(0)");
+	timeSum.html(timeSum.html().slice(0, -3));
+
+	// Reset variables
+	hitLine = line = null;
+	msg = "";
+	validBit = -1;
+	stage = -1;
+
+	// Disable simulator controls
+	toggleSimBtns();
+
+	// Enable address controls
+	toggleAddrBtns();
+}
+
+/** Check if there has been a hit or miss and updated the hitLine in case of hit*/
+function isHit() {
+	// Find line inside the set
+	let lineToCompare;
+
+	// Loop lines per set
+	for (i = 0; i < nway; i++) {
+		// If fully associative, compare with every line of the table
+		if (ppolicy === "fullyAssociative") lineToCompare = "#way-0 > tbody > tr:eq(" + i + ")";
+		// Otherwise, compare with the corresponding line on each table
+		else lineToCompare = "#way-" + i + " > tbody > tr:eq(" + set + ")";
+		tagToCompare = $(lineToCompare + " > td:eq(3)").html();
+		if (tagToCompare === toPaddedBinary(tag, brTagBits) && $(lineToCompare + " > td:eq(1)").html() === "1") {
+			hitLine = $(lineToCompare);
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Finds and returns the oldest line in cache memory
+ * depending on placement policy
+ * @returns The oldest line based on LRU/FIFO
+ */
+function getOldestLine() {
+	let oldestLine = $("#way-0 > tbody > tr:eq(" + set + ")");
+	let oldestLineReplBits = parseInt(oldestLine.find("td:eq(4)").html(), 2);
+	let currLine;
+	let currLineReplBits;
+	for (i = 1; i < nway; i++) {
+		if (ppolicy == "fullyAssociative") currLine = $("#way-0 > tbody > tr:eq(" + i + ")");
+		else currLine = $("#way-" + i + " > tbody > tr:eq(" + set + ")");
+		currLineReplBits = parseInt(currLine.find("td:eq(4)").html(), 2);
+
+		// Compare oldest line bits with current line bits
+		if (currLineReplBits < oldestLineReplBits) {
+			oldestLine = currLine;
+			oldestLineReplBits = currLineReplBits;
+		}
+	}
+	return oldestLine;
+}
+
+/**
+ * Finds a line with valid bit = 0. Otherwise, returns a random line.
+ * @returns HTML table tr
+ */
+function getRandomLine() {
+	let line;
+	let validBit;
+
+	for (i = 0; i < nway; i++) {
+		// If fully associative, compare with every line of the table
+		if (ppolicy === "fullyAssociative") line = "#way-0 > tbody > tr:eq(" + i + ")";
+		// If set associative, compare with the corresponding line on each table
+		else line = "#way-" + i + " > tbody > tr:eq(" + set + ")";
+
+		validBit = $(line + " > td:eq(1)").html();
+		if (validBit === "0") return $(line);
+	}
+
+	// If no line with valid bit is found, return random line
+	lineNum = Math.floor(Math.random() * nway);
+	if (ppolicy == "fullyAssociative") line = "#way-0 > tbody > tr:eq(" + lineNum + ")";
+	else line = "#way-" + lineNum + " > tbody > tr:eq(" + set + ")";
+	return $(line);
 }
 
 /**
  * Converts a decimal number to binary number with the desired zerofill
  * @param {number} n the number to get converted
- * @param {String} fill the number of zeroes to the left
+ * @param {String} length length with zero fill
  * @returns the binary number with the selected zerofill
  */
-function toBinary(n, fill) {
-    return ("0".repeat(fill)+n.toString(2)).slice(-fill);
+function toPaddedBinary(n, length) {
+	return n.toString(2).padStart(length, "0");
 }
 
 /**
  * Updates the replacement bits
  * @param {HTMLTableRowElement} line line in the cache memory
  */
-function updateReplBits(line) {
-    // Reduce replacement bits for the rest of lines with higher repl bits
-    for (i = 0; i < nway; i++) {
-        if (set*nway+i != line.rowIndex-2) {
-            currLine = set*nway+i;
-            currLine = directory.rows[currLine];
-            currLineReplBits = parseInt(currLine.cells[4].innerHTML, 2);
-            // Check if replacement bits are higher than  current line
-            if (currLineReplBits > parseInt(line.cells[4].innerHTML, 2)) {
-                currLine.cells[4].innerHTML = toBinary(currLineReplBits-1, Math.log2(nway));
-            }
-        }
-    }
+function updateReplBits(lineToUpdate) {
+	// Get the repl bits of the line to update
+	lineToUpdateReplBits = parseInt(lineToUpdate.find("td:eq(4)").html(), 2);
 
-    // Update the replacement bits of updated line
-    line.cells[4].innerHTML = toBinary(nway-1, Math.log2(nway));
+	// Reduce replacement bits for the rest of lines with higher repl bits
+	for (i = 0; i < nway; i++) {
+		if (ppolicy === "fullyAssociative") currLine = $("#way-0 > tbody > tr:eq(" + i + ")");
+		else currLine = $("#way-" + i + " > tbody > tr:eq(" + set + ")");
+
+		if (!currLine.is(lineToUpdate)) {
+			currLineReplBits = parseInt(currLine.find("td:eq(4)").html(), 2);
+			// Check if replacement bits are higher than current line
+			if (currLineReplBits > lineToUpdateReplBits) {
+				currLine.find("td:eq(4)").html(toPaddedBinary(currLineReplBits - 1, Math.log2(nway)));
+			}
+		}
+	}
+
+	// Update the replacement bits of updated line
+	lineToUpdate.find("td:eq(4)").html(toPaddedBinary(nway - 1, Math.log2(nway)));
 }
 
 /**
@@ -631,16 +794,16 @@ function updateReplBits(line) {
  * @param {String} tag the new tag
  */
 function updateTag(line, tag) {
-    line.cells[3].innerHTML = toBinary(tag, tagBits);
+	line.find("td:eq(3)").html(toPaddedBinary(tag, brTagBits));
 }
 
 /**
- * Updates the busy bit
+ * Updates the valid bit
  * @param {HTMLTableRowElement} line line in the cache memory
- * @param {String} bit the new busy bit
+ * @param {String} bit the new valid bit
  */
-function updateBusyBit(line, bit)  {
-    line.cells[1].innerHTML = bit;
+function updateValidBit(line, bit) {
+	line.find("td:eq(1)").html(bit);
 }
 
 /**
@@ -648,8 +811,8 @@ function updateBusyBit(line, bit)  {
  * @param {HTMLTableRowElement} line line in the cache memory
  * @returns the dirty bit
  */
-function checkDirtyBit(line) {
-    return line.cells[2].innerHTML;
+function isDirty(line) {
+	return line.find("td:eq(2)").html() === "1";
 }
 
 /**
@@ -658,27 +821,7 @@ function checkDirtyBit(line) {
  * @param {String} bit the new dirty bit
  */
 function updateDirtyBit(line, bit) {
-    line.cells[2].innerHTML = bit;
-}
-
-/**
- * Finds and returns the oldest in cache memory
- * @returns The oldest line based on LRU/FIFO
- */
-function getOldestLine() {
-    // Find the oldest line (LRU or FIFO is same on miss)
-    let oldestLine = directory.rows[set*nway];
-    let oldestLineReplBits = parseInt(oldestLine.cells[4].innerHTML);
-    for (i = 1; i < nway; i++) {
-        let currLine = directory.rows[set*nway+i];
-        let currLineReplBits = parseInt(currLine.cells[4].innerHTML);
-        // Compare oldest line bits with current line bits
-        if (currLineReplBits < oldestLineReplBits) {
-            oldestLine = currLine;
-            oldestLineReplBits = currLineReplBits;
-        }
-    }
-    return oldestLine;
+	line.find("td:eq(2)").html(bit);
 }
 
 /**
@@ -687,9 +830,7 @@ function getOldestLine() {
  * @param {String} block the data block
  */
 function transferBlock(line, block) {
-    for (i = 0; i < wperb; i++) {
-        content.rows[line.rowIndex-1].cells[i].innerHTML = block[i];
-    }
+	for (i = 0; i < blsize; i++) line.find("td:eq(" + (i + 5) + ")").html(block[i]);
 }
 
 /**
@@ -697,133 +838,149 @@ function transferBlock(line, block) {
  * @param {String} msg the message to get printed
  * @param {String} bgColor the background for the message wrapper
  */
-function printSimStatus(msg, bgColor = "#fff") {
-    document.getElementById("simMsg").innerHTML = msg;
-    document.getElementById("simMsgWrapper").style.backgroundColor = bgColor;
-}
-
-/**
- * Adds a new row in the access times table
- */
-function createTimeRow() {
-    let lastRow = document.getElementById("tTable").tBodies[0].insertRow();
-    lastRow.insertCell().innerHTML;
-    lastRow.insertCell().innerHTML = tTime;
-}
-
-/**
- * Updates the last row in the access times table
- * @param {} cycles 
- */
-function updateTimeRow(cycles) {
-    let lastRowIndex = document.getElementById("tTable").tBodies[0].rows.length-1;
-    let lastRow = document.getElementById("tTable").tBodies[0].rows[lastRowIndex];
-    lastRow.cells[0].innerHTML += cycles + " + ";
-    lastRow.cells[1].innerHTML = tTime;
-}
-
-/**
- * Adds the result to the partial access time in access times table
- */
-function updateTimeRowWithPartial() {
-    let lastRowIndex = document.getElementById("tTable").tBodies[0].rows.length-1;
-    let partial = document.getElementById("tTable").tBodies[0].rows[lastRowIndex].cells[0];
-    partial.innerHTML = partial.innerHTML.substring(0, partial.innerHTML.length-2) + "= " + pTime;
-}
-
-/**
- * Adds a hit to hit/miss chart
- */
-function addHit() {
-    statChart.data.datasets[0].data[0]++;
-    statChart.update();
-}
-
-/**
- * Adds a miss to hit/miss chart
- */
-function addMiss() {
-    statChart.data.datasets[0].data[1]++;
-    statChart.update();
+function simMsg(msg, bgColor = "#fff") {
+	$("#simMsg").html(msg);
+	$("#simMsg").css("background-color", bgColor);
 }
 
 /**
  * Enables/disables the address input
  */
 function toggleAddrBtns() {
-    document.getElementById("randAddr").classList.toggle("disabled");
-    document.getElementById("address-input").toggleAttribute("disabled");
-    document.querySelector('input[type="radio"][value="ld"]').toggleAttribute("disabled");
-    document.querySelector('input[type="radio"][value="st"]').toggleAttribute("disabled");
-    document.getElementById("send").classList.toggle("disabled");
+	genRandAddrBtn.toggleClass("disabled");
+	sendBtn.toggleClass("disabled");
 }
 
 /** Enables/disables the simulator controller */
-function toggleSimControls() {
-    document.getElementById("next").classList.toggle("disabled");
-    document.getElementById("fast-forward").classList.toggle("disabled");   
+function toggleSimBtns() {
+	nextBtn.toggleClass("disabled");
+	fastForwardBtn.toggleClass("disabled");
 }
 
-
-
-// ---------------Element highlighters---------------
-
-function highlightSet(color) {
-    for (i = 0; i < nway; i++) {
-        let line = directory.rows[set*nway+i];
-        for (j = 0; j < 5; j++) line.cells[j].style.backgroundColor = color;
-    }
+function addTime(cycles) {
+	pTime += cycles;
+	tTime += cycles;
 }
 
-function highlightLine(line, color) {
-    for (i = 0; i < 5; i++) line.cells[i].style.backgroundColor = color;
+/**
+ * Renders the access time chart
+ */
+function setupAccessTimeChart() {
+	var ctxL = document.getElementById("accessTimeChart").getContext("2d");
+	accessTimeChart = new Chart(ctxL, {
+		type: "line",
+		data: {
+			labels: [],
+			datasets: [
+				{
+					label: "Access time per instruction",
+					data: [],
+					backgroundColor: ["rgba(66, 133, 244, .3)"],
+					borderColor: ["rgba(66, 133, 244, .7)"],
+					borderWidth: 2,
+				},
+			],
+		},
+		options: {
+			scales: {
+				xAxes: [
+					{
+						gridLines: {
+							display: false,
+						},
+						scaleLabel: {
+							display: true,
+							labelString: "Instruction",
+						},
+					},
+				],
+				yAxes: [
+					{
+						display: true,
+						ticks: {
+							min: 0,
+							max: tcm + Math.max(2 * tBt, tBt + tmm), // longest time between wb/wt miss
+						},
+						gridLines: {
+							display: false,
+						},
+						scaleLabel: {
+							display: true,
+							labelString: "Access time",
+						},
+					},
+				],
+			},
+			legend: {
+				onClick: (e) => e.stopPropagation(),
+			},
+			responsive: true,
+		},
+	});
 }
 
-function highlightBusyBit(color) {
-    for (i = 0; i < nway; i++) {
-        let line = set*nway+i;
-        directory.rows[line].cells[1].style.backgroundColor = color;
-    }
+/**
+ * Updates the access time chart
+ * @param {Number} cycles number of cycles to complete the operation
+ */
+function updateAccessTimeChart(cycles) {
+	// Add new access time
+	accessTimeChart.data.labels.push(instructionI.val());
+	accessTimeChart.data.datasets[0].data.push(cycles);
+
+	if (accessTimeChart.data.datasets[0].data.length == 10) {
+		accessTimeChart.data.labels.shift();
+		accessTimeChart.data.datasets[0].data.shift();
+	}
+	accessTimeChart.update();
 }
 
-function highlightTag(color) {
-    for (i = 0; i < nway; i++) {
-        let line = set*nway+i;
-        directory.rows[line].cells[3].style.backgroundColor = color;
-    }
+/**
+ * Updates the access time table
+ */
+function updateAccessTT(cycles) {
+	accessTT.find("tr:eq(0) > td:eq(0)").append(cycles + " + ");
+	accessTT.find("tr:eq(0) > td:eq(1)").html(pTime + " cycles");
+	accessTT.find("tr:eq(0) > td:eq(2)").html(tTime + " cycles");
 }
 
-function highlightContent(color) {
-    for (i = 0; i < wperb; i++) content.tBodies[0].rows[line].cells[i].style.backgroundColor = color;
+/**
+ * Renders the hit/miss rate chart
+ */
+function setupHitMissRateChart() {
+	var ctxP = document.getElementById("hitMissRateChart").getContext("2d");
+	hitMistRateChart = new Chart(ctxP, {
+		// plugins: [ChartDataLabels],
+		type: "pie",
+		data: {
+			labels: ["Hit", "Miss"],
+			datasets: [
+				{
+					data: [0, 0],
+					backgroundColor: ["#2ECC71", "#E74C3C"],
+					hoverBackgroundColor: ["#58D68D", "#EC7063"],
+				},
+			],
+		},
+		options: {
+			responsive: true,
+		},
+	});
 }
 
-function highlightDirtyBit(color) {
-    line.cells[2].style.backgroundColor = color;
-}
-
-function highlightReplacementBits(colorOldest, colorRest) {
-    line.cells[4].style.backgroundColor = colorOldest;
-    for (i = 0; i < nway; i++) {
-        let currLine = directory.rows[set*nway+i];
-        if (currLine.rowIndex != line.rowIndex) currLine.cells[4].style.backgroundColor = colorRest;
-    }
-}
-
-function highlightMMBlock(color) {
-    for (i = 0; i < wperb; i++) mm.tBodies[0].rows[block].cells[i].style.backgroundColor = color; 
-}
-
-function removeSetHighlight() {
-    for (i = 0; i < nway; i++) {
-        let line = set*nway+i;
-        for(j = 0; j < 5; j++) directory.rows[line].cells[j].style.backgroundColor = "#fff";
-    }
-}
-
-function removeContentHighlight(line) {
-    for (i = 0; i < wperb; i++) content.tBodies[0].rows[line.rowIndex-2].cells[i].style.backgroundColor = "#fff";
-}
-
-function removeMMBlockHighlight() {
-    for (i = 0; i < wperb; i++) mm.tBodies[0].rows[block].cells[i].style.backgroundColor = "#fff";
+/**
+ * Updates the hit/miss rate chart
+ * @param {boolean} hit whether the operation has been a hit or not
+ */
+function updateHitMissRateChart(hit) {
+	if (hit) {
+		hits++;
+		hitMistRateChart.data.datasets[0].data[0]++;
+	} else {
+		misses++;
+		hitMistRateChart.data.datasets[0].data[1]++;
+	}
+	hitMistRateChart.update();
+	hitMissRateTable.find("tr:eq(0) > td:eq(0)").html(((100 * hits) / (hits + misses)).toFixed(2) + "%");
+	hitMissRateTable.find("tr:eq(0) > td:eq(1)").html(((100 * misses) / (hits + misses)).toFixed(2) + "%");
 }

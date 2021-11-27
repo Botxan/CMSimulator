@@ -1,133 +1,192 @@
-.btn {
-  padding: .375rem .75rem;
-}
-
 body {
-  background-color: #F1F1F1;
+	background-color: #f1f1f1;
 }
 
-.setup, .simulator, .explanation {
-  background-color: #fff;
+/* setup sidenav */
+
+.setup-sidenav {
+	height: 100vh;
+	width: 580px;
+	position: fixed;
+	z-index: 2;
+	top: 0;
+	left: 0;
+	background-color: inherit;
+	overflow: hidden;
+	transition: 0.3s;
+	white-space: nowrap;
 }
 
-body {
-  margin-top: 1vh;
+.setup-sidenav .closebtn {
+	color: #818181;
+	font-size: 36px;
+	white-space: nowrap;
 }
 
-.setup {
-  position: relative;
-  height: 98vh;
-  overflow-y: auto;
+.setup-sidenav .closebtn:hover {
+	color: #454d55;
 }
 
-.setup > h1 {
-  margin-bottom: 0;
+.setup-sidenav .setup-form {
+	height: calc(100vh - 40px);
+	padding: 15px;
+	overflow: scroll;
 }
 
-.setup input[type="number"] {
-  padding: 2px !important;
+.setup-sidenav .setup-form .btn {
+	margin: 0;
 }
 
-.addr-structures th,
-.addr-structures td {
-  min-width: 3px;
+/* </> setup sidenav */
+
+/* main */
+.main {
+	overflow: hidden;
+}
+/* </> main */
+
+/* nav */
+.main > .navbar {
+	position: fixed;
+	width: 100%;
+	z-index: 1;
+}
+/* </> nav*/
+
+/* Card */
+.top-card {
+	min-width: 300px;
 }
 
-.table {
-  text-align: center;
+.card-body {
+	padding: 0.6rem 1rem;
 }
 
-.simulator {
-  min-height: 60vh;
+.breakdown .card-body {
+	padding: 0;
 }
 
-.address-input-wrapper {
-  width: 98%;
-  margin-top: -35px;
-  align-self: center;
-  padding: 10px;
+.card-footer {
+	padding: 0.5rem 1rem;
 }
 
-.st-ld {
-  height: 40px;
+.sim-msg {
+	background-color: #fff;
 }
 
-.sim-msg-wrapper {
-  padding: 5px;
-  font-weight: 300;
-  font-size: .9em;
+table .th-sm {
+	min-width: 0;
+}
+/* </> Card */
+
+/* Simulator wrapper */
+.simulator-wrapper {
+	--simHeight: 60vh;
+	min-height: var(--simHeight);
 }
 
-.sim-controller {
-  margin: -16px -16px 16px -16px;
-  padding: 5px;
+.simulator-wrapper td,
+.simulator-wrapper th {
+	width: 5px !important;
+	padding: 0 !important;
 }
 
-.address-input{
-  min-width: 245px;
-  padding: 1.9px 5px;
-  border: 2px solid #fff;
-  border-radius: 2px;
-  outline: 0;
-  background: transparent;
-  color: #fff;
+.cm-wrapper,
+.mm-wrapper {
+	min-height: var(--simHeight);
 }
 
-.address-input:disabled {
-  opacity: .7;
+.cm,
+.mm {
+	min-height: var(--simHeight);
+	box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%), 0 2px 10px 0 rgb(0 0 0 / 12%);
+	border-radius: 0.25rem;
 }
 
-.sim-controller .address-input::placeholder {
-  color: rgb(255, 255, 255 , .5);
+.mm {
+	padding: 0;
 }
 
-.ld {
-  margin-top: 15px;
+.cm,
+.mm {
+	border: 2px dashed #1c6ea4;
+	background-color: rgba(253, 235, 208, 0.5);
+}
+.cm-header,
+.mm-header {
+	width: 190px;
+	box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%), 0 2px 10px 0 rgb(0 0 0 / 12%);
+	margin: -25px 0px 10px 10px;
+	padding: 10px;
+	border: 2px dashed #1c6ea4;
+	border-radius: 0.25rem;
+	text-align: center;
 }
 
-.directory th, .directory td, .content th, .content td, .mm td {
-  padding: 0 !important;
+.cm .cm-header,
+.mm .mm-header {
+	background: rgba(253, 235, 208, 1);
 }
 
-.content th {
-  line-height: 3;
+.mm-header {
+	margin-bottom: 10px;
+	margin-left: 25px;
 }
 
-.mm td {
-  font-size: .7rem;;
+.cm-header h4,
+.mm-header h4 {
+	margin-bottom: 0;
 }
 
-.table-wrapper {
-  max-height: 45vh;
-  overflow: auto;
+.cm .table-wrapper .table {
+	background-color: #fff;
+	margin: 0;
 }
 
-.statistics {
-  margin-top: 2vh;
+.mm .table-wrapper {
+	height: calc(var(--simHeight) - 42px);
+	overflow-y: auto;
 }
 
-.calc-table td{
-  min-width: 40px;
+.mm table {
+	width: 100%;
 }
 
+.mm table td {
+	padding: 0;
+	font-size: 0.7em;
+}
+
+/* </> Simulator wrapper */
+
+/* Statistics */
+.statistics > .card {
+	min-width: 400px;
+}
+/* </> Statistics */
+
+/* Scrollbar modifications */
 .scrollbar-primary::-webkit-scrollbar {
-  width: 8px;
-  background-color: #F5F5F5; }
-  
+	width: 8px;
+	background-color: #fff;
+}
+
 .scrollbar-primary::-webkit-scrollbar-thumb {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
-  background-color: #4285F4; 
+	box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+	background-color: #4285f4;
 }
-  
+
 .scrollbar-primary {
-  scrollbar-color: #4285F4 #F5F5F5;
+	scrollbar-color: #4285f4 #f5f5f5;
 }
+/* </> scrollbar modifications */
 
-.calc-table td {
-  padding: 3.2px !important;
-}
-
-.time-table-wrapper {
-  max-height: 32vh;
-  overflow: auto;
+@media screen and (max-height: 450px) {
+	.setup-sidenav {
+		padding-top: 15px;
+	}
+	.setup-sidenav a {
+		font-size: 18px;
+	}
 }

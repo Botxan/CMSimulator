@@ -1,406 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMSimulator</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="img/favicon.ico"/>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
-    <!-- Google Fonts Roboto -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <!-- Material Design Bootstrap -->
-    <link rel="stylesheet" href="css/mdb.min.css">
-    <!-- Own css -->
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <!-- 
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>CMSimulator</title>
+		<!-- Favicon -->
+		<link rel="icon" type="image/x-icon" href="img/favicon.ico" />
+		<!-- Font Awesome -->
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+		<!-- Google Fonts Roboto -->
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+		<!-- Bootstrap core CSS -->
+		<link rel="stylesheet" href="css/bootstrap.min.css" />
+		<!-- Material Design Bootstrap -->
+		<link rel="stylesheet" href="css/mdb.min.css" />
+		<!-- Own css -->
+		<link rel="stylesheet" href="css/style.css" />
+	</head>
+	<body>
+		<!-- Sidenav for simulator setup -->
+		<div id="setupSidenav" class="setup-sidenav">
+			<!-- Navbar -->
+			<nav class="navbar sticky-top navbar-dark primary-color">
+				<!-- Collapse button -->
+				<button class="navbar-toggler" type="button" onclick="closeNav()">
+					<span class="dark-blue-text">
+						<i class="fas fa-bars fa-1x"></i>
+					</span>
+				</button>
 
+				<!-- Logo -->
+				<a href="" class="navbar-brand mr-auto">Simulator setup</a>
+			</nav>
 
-        
-    "A fin de cuentas todo son bits" ~I.Morlán.
+			<form name="setupForm" class="setup-form scrollbar-primary" action="" onsubmit="return onSubmit()">
+				<!-- Block and word section -->
+				<h4>Block and word</h4>
+				<div class="md-form input-group">
+					<!-- Block size -->
+					<div class="input-group-prepend">
+						<span class="input-group-text">Block size</span>
+					</div>
+					<input type="number" id="blsize" aria-label="Words per block" class="form-control" placeholder="Words/Block" value="8" />
+					<div class="input-group-append">
+						<span class="input-group-text md-addon">words</span>
+					</div>
 
+					<!-- Word size -->
+					<div class="input-group-prepend ml-2">
+						<span class="input-group-text">Word size:</span>
+					</div>
+					<input type="number" id="wsize" aria-label="Bytes per word" class="form-control" placeholder="Bytes/Word" value="4" />
+					<div class="input-group-append">
+						<span class="input-group-text md-addon">bytes</span>
+					</div>
+				</div>
+				<!-- </> Block and word section -->
 
+				<hr />
 
-     -->
-    <div class="main px-4">
-        <div class="row gx-3">
-            <div class="col-sm-4">
-                <div id="setup" class="card setup p-3 scrollbar-primary square">
-                    <h1>CMSim</h1>
-                    <form name="setupForm" action="" onsubmit="return onSubmit()">
-                        <div id="sizes" class="sizes">  
-                            <hr>
-                            <h6>Sizes and time costs</h6> 
-                            <!-- CM -->          
-                            <div class="md-form input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text md-addon">Cache memory</span>
-                                </div>
-                                <input type="number" id="cmsize" aria-label="Cache memory size" class="form-control" placeholder="2ⁿ bytes" value="256">
-                                <div class="input-group-append">
-                                    <span class="input-group-text md-addon">B</span>
-                                </div>
-                                <input type="number" id="tCM" aria-label="Cache memory access time" class="form-control" placeholder="cycles" value="2">
-                                <div class="input-group-append">
-                                    <span class="input-group-text md-addon">cycles</span>
-                                </div>
-                            </div>
+				<!-- Main memory section -->
+				<h4>Main memory</h4>
+				<div class="md-form input-group">
+					<!-- MM size -->
+					<div class="input-group-prepend">
+						<span class="input-group-text">Size</span>
+					</div>
+					<input type="number" id="mmsize" aria-label="Main memory size" class="form-control" placeholder="2ⁿ bytes" value="2048" />
+					<div class="input-group-append">
+						<span class="input-group-text md-addon">bytes</span>
+					</div>
 
-                            <!-- MM size -->
-                            <div class="md-form input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text md-addon">Main memory</span>
-                                </div>
-                                <input type="number" id="mmsize" aria-label="Main memory size" class="form-control" placeholder="2ⁿ bytes" value="2048">
-                                <div class="input-group-append">
-                                    <span class="input-group-text md-addon">B</span>
-                                </div>
-                                <input type="number" id="tMM" aria-label="Main memory access time" class="form-control" placeholder="cycles" value="21">
-                                <div class="input-group-append">
-                                    <span class="input-group-text md-addon">cycles</span>
-                                </div>
-                            </div>
+					<!-- MM access time -->
+					<div class="input-group-prepend">
+						<span class="input-group-text">Access time</span>
+					</div>
+					<input type="number" id="tmm" aria-label="Main memory access time" class="form-control" placeholder="cycles" value="21" />
+					<div class="input-group-append">
+						<span class="input-group-text md-addon">cycles</span>
+					</div>
+				</div>
 
-                            <!-- Words per block / Bytes per block -->
-                            <div class="md-form input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text md-addon">Block / Word</span>
-                                </div>
-                                <input type="number" id="wperb" aria-label="Words per block" class="form-control" placeholder="Words/Block" value="8">
-                                <div class="input-group-append">
-                                    <span class="input-group-text md-addon">words</span>
-                                </div>
-                                <input type="number" id="wsize" aria-label="Bytes per word" class="form-control" placeholder="Bytes/Word" value="4">
-                                <div class="input-group-append">
-                                    <span class="input-group-text md-addon">bytes</span>
-                                </div>
-                            </div>
+				<div class="md-form input-group">
+					<div class="input-group-prepend">
+						<span class="input-group-text">Buffer access time</span>
+					</div>
+					<input type="number" id="tbuff" aria-label="Interleaving buffer access time" class="form-control" placeholder="cycles" value="1" />
+					<div class="input-group-append">
+						<span class="input-group-text md-addon">cycles</span>
+					</div>
+				</div>
+				<!-- </> Main memory section -->
 
-                            <!-- Interleaving buffer access time -->
-                            <div class="md-form input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text md-addon">Buffer access time</span>
-                                </div>
-                                <input type="number" id="tBuff" aria-label="Interleaving buffer access time" class="form-control" placeholder="cycles" value="1">
-                                <div class="input-group-append">
-                                    <span class="input-group-text md-addon">cycles</span>
-                                </div>
-                            </div>
-                        </div>
+				<hr />
 
-                        <hr>
+				<!-- Cache memory section -->
+				<h4>Cache memory</h4>
+				<div class="md-form input-group">
+					<!-- CM Size -->
+					<div class="input-group-prepend">
+						<span class="input-group-text">Size</span>
+					</div>
+					<input type="number" id="cmsize" aria-label="Cache memory size" class="form-control" placeholder="2ⁿ bytes" value="256" />
+					<div class="input-group-append">
+						<span class="input-group-text md-addon">bytes</span>
+					</div>
 
-                        <!-- Placement policy -->
-                        <div id="ppolicy" class="placement-policy mt-2 mb-2">
-                            <h6 class="mb-3">Placement policy</h6>                            
-                            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
-                                <label class="btn btn-primary active">
-                                    <input type="radio" name="ppolicy" autocomplete="off" value="directMap" checked>
-                                    Direct-map
-                                </label>
-                                <label class="btn btn-primary">
-                                    <input type="radio" autocomplete="off" name="ppolicy" value="fullyAssociative">
-                                    Fully Associative
-                                </label>
-                                <label class="btn btn-primary">
-                                    <input type="radio" autocomplete="off" name="ppolicy" value="setAssociative">
-                                    Set-Associative
-                                </label>
-                            </div>
+					<!-- CM access time -->
+					<div class="input-group-prepend">
+						<span class="input-group-text">Access time</span>
+					</div>
+					<input type="number" id="tcm" aria-label="Cache memory access time" class="form-control" placeholder="cycles" value="2" />
+					<div class="input-group-append">
+						<span class="input-group-text md-addon">cycles</span>
+					</div>
+				</div>
+				<!-- </> Cache memory section -->
 
-                            <!-- Number of sets -->
-                            <div class="md-form input-group mt-2 mb-3">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text md-addon" name="nway-span">N-way</span>
-                                </div>
-                                <input type="number" name="nway" aria-label="nway" class="form-control" placeholder="2ⁿ lines" disabled>
-                                <div class="input-group-append">
-                                    <span class="input-group-text md-addon">lines/set</span>
-                                </div>
-                            </div>
-                        </div>
+				<hr />
 
-                        <hr>
-        
-                        <!-- Writing policy -->
-                        <div id="wpolicy" class="wpolicy mt-2 mb-2">
-                            <h6 class="mb-3">Writing policy</h6>
-                            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
-                                <label class="btn btn-primary active">
-                                    <input type="radio" name="wpolicy" autocomplete="off" value="writeThrough">
-                                    Write-through
-                                </label>
-                                <label class="btn btn-primary">
-                                    <input type="radio" name="wpolicy" autocomplete="off" value="writeBack" checked>
-                                    Write-back
-                                </label>
-                            </div>
+				<!-- Placement policy section -->
+				<h4>Placement policy</h4>
+				<div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+					<label class="btn btn-primary active">
+						<input type="radio" name="ppolicy" autocomplete="off" value="directMap" onclick="disableNway();" checked />
+						Direct-map
+					</label>
+					<label class="btn btn-primary">
+						<input type="radio" autocomplete="off" name="ppolicy" value="fullyAssociative" onclick="disableNway();" />
+						Fully Associative
+					</label>
+					<label class="btn btn-primary">
+						<input type="radio" autocomplete="off" name="ppolicy" value="setAssociative" onclick="enableNway();" />
+						Set-Associative
+					</label>
+				</div>
+				<!-- Number of sets -->
+				<div class="md-form input-group mt-2 mb-3">
+					<div class="input-group-prepend">
+						<span class="input-group-text" name="nway-span">N-way</span>
+					</div>
+					<input type="number" id="nway" name="nway" aria-label="nway" class="form-control" placeholder="2ⁿ lines" disabled />
+					<div class="input-group-append">
+						<span class="input-group-text md-addon">lines/set</span>
+					</div>
+				</div>
+				<!-- </> Placement policy section -->
 
-                            <hr>
+				<hr />
 
-                            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
-                                <label class="btn btn-primary active">
-                                    <input type="radio" name="wrAlloc" autocomplete="off" value="writeOnAllocate" checked>
-                                    Write on allocate
-                                </label>
-                                <label class="btn btn-primary">
-                                    <input type="radio" name="wrAlloc" autocomplete="off" value="writeAround">
-                                    Write around
-                                </label>
-                            </div>
-                        </div>
+				<!-- Writing policy -->
+				<h4 class="mb-3">Writing policy</h4>
+				<div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+					<label class="btn btn-primary active">
+						<input type="radio" name="wpolicy" autocomplete="off" value="writeThrough" />
+						Write-through
+					</label>
+					<label class="btn btn-primary">
+						<input type="radio" name="wpolicy" autocomplete="off" value="writeBack" checked />
+						Write-back
+					</label>
+				</div>
+				<br />
+				<div class="btn-group btn-group-toggle w-100 mt-3" data-toggle="buttons">
+					<label class="btn btn-primary active">
+						<input type="radio" name="walloc" autocomplete="off" value="writeOnAllocate" checked />
+						Write on allocate
+					</label>
+					<label class="btn btn-primary">
+						<input type="radio" name="walloc" autocomplete="off" value="writeAround" />
+						Write around
+					</label>
+				</div>
+				<!-- </> Writing policy -->
 
-                        <hr>
-        
-                        <!-- Replacement policy -->
-                        <div id="rpolicy" class="replacement-policy mt-2 mb-2">
-                            <h6 class="mb-3">Replacement policy</h6>
-                            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
-                                <label class="btn btn-primary active">
-                                    <input type="radio" name="rpolicy" autocomplete="off" value="no">
-                                    No
-                                </label>
-                                <label class="btn btn-primary">
-                                    <input type="radio" autocomplete="off" name="rpolicy" value="lru" checked>
-                                    LRU
-                                </label>
-                                <label class="btn btn-primary">
-                                    <input type="radio" autocomplete="off" name="rpolicy" value="fifo">
-                                    FIFO  
-                                </label>
-                            </div>
-                        </div>
+				<hr />
 
-                        <hr>
+				<!-- Replacement policy -->
+				<h4 class="mb-3">Replacement policy</h4>
+				<div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+					<label class="btn btn-primary active">
+						<input type="radio" name="rpolicy" autocomplete="off" value="random" />
+						Random
+					</label>
+					<label class="btn btn-primary">
+						<input type="radio" autocomplete="off" name="rpolicy" value="lru" checked />
+						LRU
+					</label>
+					<label class="btn btn-primary">
+						<input type="radio" autocomplete="off" name="rpolicy" value="fifo" />
+						FIFO
+					</label>
+				</div>
+				<!-- </> Replacement policy -->
 
-                        <div class="submit-wrapper d-flex flex-grow-1 align-items-end mt-2">
-                            <button id="submit" type="submit" class="btn btn-default btn-lg w-100" value="submit">Submit</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+				<hr />
 
-            <div class="col-sm-8">
-                <!-- Card deck -->
-                <div class="addr-structures card-deck addr-structures">
-                    <!-- Cache memory address -->
-                    <div class="card mb-4">
-                        <!--Table-->
-                        <table id="CMAddr" class="table table-bordered table-dark table-sm mb-0">
-                            <!--Table head-->
-                            <thead>
-                                <tr>
-                                    <th class="th-sm">TAG</th>
-                                    <th class="th-sm">SET</th>
-                                    <th class="th-sm">WORD</th>
-                                    <th class="th-sm">BYTE</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+				<!-- Submit / Reset -->
+				<button id="submit" type="submit" value="submit" class="btn btn-info btn-lg w-100">Submit</button>
+				<!-- </> Submit / Reset -->
+			</form>
+		</div>
+		<!-- </> Sidenav for simulator setup -->
 
-                    <!-- Simulator status -->
-                    <div id="simMsgWrapper" class="card mb-4 sim-msg-wrapper d-flex align-items-center justify-content-center text-center">
-                        <p id="simMsg" class="card-text simMsg">Waiting for instruction...</p>
-                    </div>
+		<!-- Main -->
+		<div id="main" class="main">
+			<!-- Navbar -->
+			<nav class="navbar navbar-dark primary-color">
+				<!-- Collapse button -->
+				<button class="navbar-toggler" type="button" onclick="openNav()">
+					<span class="dark-blue-text">
+						<i class="fas fa-bars fa-1x"></i>
+					</span>
+				</button>
 
-                    <!-- Main memory address -->
-                    <div class="card mb-4">
-                        <div class="table-wrapper">
-                            <!--Table-->
-                            <table id="MMAddr" class="table table-dark table-bordered table-sm mb-0">     
-                                <!--Table head-->
-                                <thead>
-                                    <tr>
-                                        <th class="th-sm">BLOCK</th>
-                                        <th class="th-sm">WORD</th>
-                                        <th class="th-sm">BYTE</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+				<!-- Logo -->
+				<a href="" class="navbar-brand mr-auto">CMSimulator</a>
+			</nav>
 
-                <!-- Simulator -->
-                <div class="card simulator p-3 d-flex flex-column mt-1">
-                    <div id="simController" class="sim-controller blue-gradient d-flex justify-content-around align-items-center">
-                        <div id="addressInput">
-                            <button id="randAddr" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2 disabled" onclick="getRandomAddr()">
-                                Gen. rand. addr
-                                <i class="fas fa-random"></i>
-                            </button>
-                            <input id="address-input" name="address-input" type="number" placeholder="Introduce an instruction (byte)" class="address-input z-depth-1" disabled>
-                            <div class="custom-control custom-radio custom-control-inline text-white">
-                                <input type="radio" class="custom-control-input" id="ld" class="ld" name="operation" value="ld" checked disabled>
-                                <label class="custom-control-label" for="ld">ld</label>
-                            </div>
-                                
-                            <div class="custom-control custom-radio custom-control-inline text-white">
-                                <input type="radio" class="custom-control-input" id="st" name="operation" value="st" disabled>
-                                <label class="custom-control-label" for="st">st</label>
-                            </div>
-                            <button id="send" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2 disabled" onclick="step()">
-                                Send instruction
-                                <i class="fas fa-chevron-down"></i>
-                            </button>     
-                        </div>
+			<div class="sim-main p-4 mt-5">
+				<!-- Card deck -->
+				<div class="card-deck">
+					<!-- Instruction processing -->
+					<div class="card top-card text-white bg-primary mb-5">
+						<div class="card-header"><i class="fas fa-list-ol"></i> Instruction</div>
+						<div class="card-body">
+							<div class="form-row flex-nowrap">
+								<div class="form-group col-9">
+									<input type="number" class="form-control" id="instruction" placeholder="Enter a valid instruction..." />
+								</div>
+								<div class="form-group col-3">
+									<select id="op" class="form-control">
+										<option value="ld" selected>ld</option>
+										<option value="st">st</option>
+									</select>
+								</div>
+							</div>
+						</div>
+						<div class="card-footer">
+							<div class="btn-group w-100" role="group" aria-label="Instruction input options">
+								<button id="genRandAddr" type="button" class="btn btn-info btn-sm" onclick="getRandomAddr()">Gen. Rand. Addr. <i class="fas fa-random"></i></button>
+								<button id="send" type="button" class="btn btn-info btn-sm" onclick="processAddr()">Send <i class="fas fa-microchip"></i></button>
+							</div>
+						</div>
+						<!-- Address input -->
+					</div>
 
-                        <div>
-                            <button id="next" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2 disabled" onclick="step()">
-                                Next
-                                <i class="fas fa-angle-right"></i>
-                            </button>
-                            <button id="fast-forward" type="button" class="btn btn-outline-white btn-rounded btn-sm px-2 disabled" onclick="fastForward()">
-                                Fast forward
-                                <i class="fas fa-angle-double-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-7 text-center">
-                            <h5>Cache memory</h5>
-                            <div class="row">
-                                <div class="col-sm-4">
-                                    <div class="table-wrapper">
-                                        <table id="directory" class="table table-bordered table-sm directory">
-                                            <thead>
-                                                <tr>
-                                                    <th colspan="5">
-                                                        Directory</tr>
-                                                    </th>
-                                                <tr>
-                                                    <th>set</th>
-                                                    <th>busy</th>
-                                                    <th>dirty</th>
-                                                    <th>tag</th>
-                                                    <th>repl</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="col-sm-8">
-                                    <div class="table wrapper">
-                                        <table id="content" class="content table table-bordered table-sm content">
-                                            <thead>
-                                                <tr>
-                                                    <th>content</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-5 text-center">
-                            <h5>Main memory</h5>
-                            <div class="table-wrapper scrollbar-primary square">
-                                <table id="mm" class="table table-sm table-bordered mm">
-                                    <thead>
-                                        <tr>
-                                            <th>Blocks</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+					<!-- Instruction breakdown -->
+					<div class="breakdown card top-card text-white mb-5" style="background-color: #343a40">
+						<div class="card-header"><i class="fas fa-columns"></i> Breakdown</div>
+						<div class="card-body">
+							<!--Table-->
+							<table id="breakdown" class="table table-dark text-center">
+								<!--Table head-->
+								<thead>
+									<tr>
+										<th>Tag</th>
+										<th>Set</th>
+										<th>Word</th>
+										<th>Byte</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>-</td>
+										<td>-</td>
+										<td>-</td>
+										<td>-</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
 
-                <!-- Formulas, cycles and statistics -->
-                <div class="statistics row mt-4">
-                    <div id="calcTableWrapper" class="calc-table-wrapper col-sm-4 ">
-                        <table id="calcTable" class="calc-table table table-bordered table-sm table-dark z-depth-1 mb-0">
-                            <tbody>
-                                <tr>
-                                    <td>Address length</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Byte in word</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Word in block</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Block</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Line</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Set</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Tag</td>
-                                    <td>-</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-sm-4 time-table-wrapper">
-                        <table id="tTable" class="time-table table tabe-bordered table-sm table-dark z-depth-1">
-                            <thead>
-                                <tr>
-                                    <th>Partial access time</th>
-                                    <th>Total access time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="card statistics-chart p-3 z-depth-1">
-                            <canvas id="pieChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>    
-        </div>
-    </div>
-    
-    <!-- jQuery -->
-    <script type="text/javascript" src="js/jquery.min.js"></script>
-    <!-- Bootstrap tooltips -->
-    <script type="text/javascript" src="js/popper.min.js"></script>
-    <!-- Bootstrap core JavaScript -->
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <!-- MDB core JavaScript -->
-    <script type="text/javascript" src="js/mdb.min.js"></script>
-    <!-- Own JS -->
-    <script src="js/script.js"></script>
-</body>
+					<!-- Simulator status -->
+					<div id="simMsgWrapper" class="card top-card mb-5">
+						<div class="card-header"><i class="far fa-comment-alt"></i> Simulation messages</div>
+
+						<!-- Simulation messages -->
+						<div id="simMsg" class="sim-msg card-body">Waiting for instruction...</div>
+						<div class="card-footer">
+							<!-- Simulator controls -->
+							<div class="btn-group w-100" role="group" aria-label="Simulator controls">
+								<button id="next" type="button" class="btn btn-info btn-sm" onclick="stage++; step();">Next <i class="fas fa-angle-right"></i></button>
+								<button id="fastForward" type="button" class="btn btn-info btn-sm" onclick="fastForward()">Fast Forward <i class="fas fa-angle-double-right"></i></button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Simulator: cache and main memory -->
+				<div class="simulator-wrapper row justify-content-between">
+					<!-- Cache memory -->
+					<div class="col-9 cm-wrapper">
+						<div id="cm" class="cm col-12">
+							<div class="cm-header">
+								<h4>Cache memory</h4>
+							</div>
+							<div id="cmTables" class="row flex-nowrap"></div>
+						</div>
+					</div>
+
+					<!-- Main memory -->
+					<div class="col-3 mm-wrapper">
+						<div id="mm" class="mm col-12">
+							<div class="mm-header">
+								<h4>Main memory</h4>
+							</div>
+							<div class="table-wrapper scrollbar-primary">
+								<table id="mmTable" class="mm-table table-sm table-bordered text-center">
+									<tbody></tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Formulas, cycles and statistics -->
+				<div class="statistics card-deck flex-wrap">
+					<div class="card mt-4">
+						<!-- Access time header -->
+						<div class="card-header"><i class="fas fa-hourglass-end"></i> Access time per instruction</div>
+						<div class="card-body">
+							<!-- Access times chart -->
+							<canvas id="accessTimeChart"></canvas>
+						</div>
+						<div class="card-footer p-0">
+							<!-- Current instruction access time & total time table -->
+							<table id="accessTimeTable" class="access-time-table table table-bordered table-sm text-center mb-0">
+								<thead>
+									<tr>
+										<th colspan="2">Current instruction</th>
+										<th>Total</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>-</td>
+										<td>-</td>
+										<td>-</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<!-- Hit/miss rate chart -->
+					<div class="card mt-4">
+						<div class="card-header"><i class="far fa-dot-circle"></i> Hit/Miss rate</div>
+						<div class="card-body">
+							<canvas id="hitMissRateChart"></canvas>
+						</div>
+						<div class="card-footer p-0">
+							<table id="hitMissRateTable" class="hit-miss-rate-table table table-bordered table-sm text-center mb-0">
+								<thead>
+									<tr>
+										<th>Hit</th>
+										<th>Miss</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>-</td>
+										<td>-</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<!-- Calculations table -->
+					<div id="calcTableWrapper" class="card calc-table-wrapper mt-4">
+						<div class="card-header"><i class="fas fa-calculator"></i> Formulas</div>
+						<div class="card-body p-0">
+							<table id="calcTable" class="calc-table table table table-bordered mb-0">
+								<tbody>
+									<tr>
+										<td>Address length</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>Byte in word</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>Word in block</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>Block</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>Line</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>Set</td>
+										<td>-</td>
+									</tr>
+									<tr>
+										<td>Tag</td>
+										<td>-</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- jQuery -->
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<!-- Bootstrap tooltips -->
+		<script type="text/javascript" src="js/popper.min.js"></script>
+		<!-- Bootstrap core JavaScript -->
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
+		<!-- MDB core JavaScript -->
+		<script type="text/javascript" src="js/mdb.min.js"></script>
+		<!-- Own JS -->
+		<script src="js/script.js"></script>
+	</body>
 </html>

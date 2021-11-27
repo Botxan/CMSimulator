@@ -3,5 +3,6 @@ This application serves as a simulator of how the data is accessed and transfere
 
 The repository has been created as a project for Computer Architecture subject.
 
-
-![CMSim](https://user-images.githubusercontent.com/33251573/135369297-03284257-cc04-4599-bd62-7e97433aa0b8.png)
+![Sim1](https://user-images.githubusercontent.com/33251573/143720682-09f73a89-e637-4543-8393-c32ba6001392.png)
+![Sim2](https://user-images.githubusercontent.com/33251573/143720680-d051f36c-3fcd-4f1e-b7a2-f3f0b42d4c97.png)
+![Sim3](https://user-images.githubusercontent.com/33251573/143720681-efebf355-1eaa-4e02-9735-69a6fa7095f2.png)

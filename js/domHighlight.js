@@ -1,6 +1,5 @@
 /* File used to store DOM animation functions */
 function toggleHglMmBlock(bgcolor = "", mmLine) {
-	console.log("The line: ", mmLine);
 	mmLine[0].scrollIntoView({
 		behavior: "smooth",
 		block: "nearest",

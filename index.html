@@ -240,8 +240,13 @@
 						</div>
 						<div class="card-footer">
 							<div class="btn-group w-100" role="group" aria-label="Instruction input options">
-								<button id="genRandAddr" type="button" class="btn btn-info btn-sm" onclick="getRandomAddr()">Gen. Rand. Addr. <i class="fas fa-random"></i></button>
-								<button id="send" type="button" class="btn btn-info btn-sm" onclick="processAddr()">Send <i class="fas fa-microchip"></i></button>
+								<button id="genRandAddr" type="button" class="btn btn-info btn-sm" onclick="getRandomAddr()">
+									Gen. Rand. Addr.
+									<i class="fas fa-random"></i>
+								</button>
+								<button id="send" type="button" class="btn btn-info btn-sm" onclick="processAddr()">
+									Send <i class="fas fa-microchip"></i>
+								</button>
 							</div>
 						</div>
 						<!-- Address input -->
@@ -283,13 +288,17 @@
 						<div class="card-footer">
 							<!-- Simulator controls -->
 							<div class="btn-group w-100" role="group" aria-label="Simulator controls">
-								<button id="next" type="button" class="btn btn-info btn-sm" onclick="stage++; step();">Next <i class="fas fa-angle-right"></i></button>
-								<button id="fastForward" type="button" class="btn btn-info btn-sm" onclick="fastForward()">Fast Forward <i class="fas fa-angle-double-right"></i></button>
+								<button id="next" type="button" class="btn btn-info btn-sm" onclick="stage++; step();">
+									Next <i class="fas fa-angle-right"></i>
+								</button>
+								<button id="fastForward" type="button" class="btn btn-info btn-sm" onclick="fastForward()">
+									Fast Forward
+									<i class="fas fa-angle-double-right"></i>
+								</button>
 							</div>
 						</div>
 					</div>
 				</div>
-
 				<!-- Simulator: cache and main memory -->
 				<div class="simulator-wrapper row justify-content-between">
 					<!-- Cache memory -->
@@ -420,7 +429,9 @@
 		<script type="text/javascript" src="js/bootstrap.min.js"></script>
 		<!-- MDB core JavaScript -->
 		<script type="text/javascript" src="js/mdb.min.js"></script>
-		<!-- Own JS -->
+		<!-- Own main JS -->
 		<script src="js/script.js"></script>
+		<!-- Own DOM animations JS -->
+		<script src="js/domHighlight.js"></script>
 	</body>
 </html>

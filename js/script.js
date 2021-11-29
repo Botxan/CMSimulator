@@ -18,7 +18,7 @@ var validSetup = false;
 var brAddrBits, brByteBits, brWordBits, brBlockBits, brTagBits, brLineBits, brSetBits;
 brAddrBits = brByteBits = brWordBits = brBlockBits = brTagBits = brLineBits = brSetBits = 0;
 
-var addr, line, hitLine, dirtyBit;
+var addr, line, mmLine, hitLine, dirtyBit;
 
 // Binary address
 var binAddr;
@@ -379,7 +379,13 @@ function buildCM() {
 				"<tr><td>" +
 					(ppolicy == "fullyAssociative" ? "-" : j) +
 					"</td><td>0</td><td>0</td><td>-</td><td>" +
-					(rpolicy === "random" ? "-" : ppolicy == "fullyAssociative" ? toPaddedBinary(j, Math.log2(nway)) : ppolicy == "setAssociative" ? toPaddedBinary(i, Math.log2(nway)) : "-") +
+					(rpolicy === "random"
+						? "-"
+						: ppolicy == "fullyAssociative"
+						? toPaddedBinary(j, Math.log2(nway))
+						: ppolicy == "setAssociative"
+						? toPaddedBinary(i, Math.log2(nway))
+						: "-") +
 					"</td>" +
 					new Array(blsize + 1).join("<td>-</td>") +
 					"</tr>"
@@ -470,8 +476,13 @@ function processAddr() {
 	accessTT.find("tr:eq(0) > td:eq(0)").html("");
 	accessTT.find("tr:eq(0) > td:eq(1)").html("");
 
-	// Reset partial time
+	// R eset partial time
 	pTime = 0;
+	document.getElementById("submit").scrollIntoView();
+
+	// Highlight the addressed block in the main memory
+	mmLine = $("#mmTable > tbody > tr:eq(" + block + ")");
+	toggleHglMmBlock("blue-8", mmLine);
 
 	// Begin simulation
 	stage++;
@@ -503,16 +514,29 @@ function step() {
 					simMsg("Placement policy is set associative. Valid bit and tag are compared with every line of the corresponding set.");
 					break;
 			}
+
+			// Highlight valid bit and tag columns
+			toggleHglValid("yellow-5");
+			toggleHglTag("yellow-5");
+
 			break;
 
 		case 2: // Resolve hit or miss and obtain the target line/block
 			hit = isHit();
 			if (hit) {
-				simMsg("A line with valid bit to 1 and matching tag has been found, so it is a cache <b>hit</b>.", "rgba(88, 214, 141, 0.5)");
+				// Highlight the hitline
+				toggleHglValid("green-5", hitLine);
+				toggleHglTag("green-5", hitLine);
+				simMsg("A line with valid bit to 1 and matching tag has been found, so it is a cache <b>hit</b>.");
+				toggleHglSimMsg("green-5");
 				line = hitLine;
 				validBit = line.find("td:eq(1)").html();
 			} else {
-				simMsg("Since there is not a line with the valid bit to 1 and same tag, it is a cache <b>miss</b>.", "rgba(236, 112, 99, 0.5)");
+				// Highlight all the lines according to the placement policy
+				toggleHglValid("red-5");
+				toggleHglTag("red-5");
+				simMsg("Since there is not a line with the valid bit to 1 and same tag, it is a cache <b>miss</b>.");
+				toggleHglSimMsg("red-5");
 				line = rpolicy === "random" && ppolicy != "directMap" ? getRandomLine() : getOldestLine();
 				validBit = line.find("td:eq(1)").html();
 			}
@@ -524,6 +548,7 @@ function step() {
 			if (ppolicy != "directMap" && rpolicy != "random" && ((hitLine && rpolicy === "lru") || (!hitLine && (rpolicy === "lru" || rpolicy === "fifo")))) {
 				updateReplBits(line);
 				simMsg("Replacement bits are updated according to <b>" + rpolicy.toUpperCase() + "</b> policy.");
+				toggleHglReplBits("blue-8");
 			} else {
 				stage++;
 				return step();
@@ -547,14 +572,19 @@ function loadStep() {
 		case 3: // HIT => Fetch Block (/)  MISS => Check dirty block
 			if (hit) {
 				msg = "Block is directly updated in the cache memory. ";
+				toggleHglCacheLine("blue-8", line);
+				// toggleHglCacheLine(line);
 				if (!isDirty(line)) {
 					msg += "The dirty bit is set to 1.";
 					updateDirtyBit(line, 1);
+					toggleHglDirty("blue-8", line);
 				}
 				simMsg(msg);
 			} else {
 				if (isDirty(line)) {
 					simMsg("The block to be replaced is dirty, so it is transfered to the main memory.");
+					toggleHglDirty("grey-5", line);
+					toggleHglCacheLine("grey-5", line);
 					addTime(tBt);
 					updateAccessTT(tBt);
 				} else {
@@ -572,15 +602,20 @@ function loadStep() {
 			} else {
 				msg = "The block is transfered from main memory to cache memory. ";
 				if (isDirty(line)) msg += "Dirty bit is updated to 0. ";
+				toggleHglDirty("blue-8", line);
 				simMsg(msg);
 				transferBlock(line, blockData);
+				toggleHglCacheLine("blue-8", line);
 
 				addTime(tBt);
 				updateAccessTT(tBt);
 
 				if (isDirty(line)) updateDirtyBit(line, 0);
 				updateTag(line, tag);
-				if (validBit == 0) updateValidBit(line, 1);
+				if (validBit == 0) {
+					updateValidBit(line, 1);
+					toggleHglValid("blue-8", line);
+				}
 			}
 			break;
 	}
@@ -596,6 +631,7 @@ function storeStep() {
 				if (wpolicy === "writeBack") {
 					simMsg("Write policy is <b>Write Back</b>, so dirty bit is set to <b>1</b>.");
 					updateDirtyBit(line, 1);
+					toggleHglDirty("blue-8", line);
 				} else {
 					// write through
 					simMsg("Block in main memory is updated.");
@@ -617,6 +653,8 @@ function storeStep() {
 					// write on allocate
 					if (wpolicy === "writeBack" && isDirty(line)) {
 						simMsg("The dirty bit is equal to 1, so the previously updated block is transferred from cache memory to main memory.");
+						toggleHglDirty("grey-5", line);
+						toggleHglCacheLine("grey-5", line);
 						addTime(tBt);
 						updateAccessTT(tBt);
 					} else {
@@ -634,15 +672,24 @@ function storeStep() {
 			} else {
 				// write on allocate
 				if (wpolicy === "writeBack") {
-					simMsg("The requested block is transfered from main memory to cache memory. New data is writen into the cache block. Dirty bit is set to 1.");
+					simMsg(
+						"The requested block is transfered from main memory to cache memory. New data is writen into the cache block. Dirty bit is set to 1."
+					);
 					updateDirtyBit(line, 1);
-				} else simMsg("The block is updated in the main memory. Then, it is transfered to the cache memory.");
+					toggleHglDirty("blue-8", line);
+				} else {
+					simMsg("The block is updated in the main memory. Then, it is transfered to the cache memory.");
+				}
 				// Transfer block MM > CM
 				transferBlock(line, blockData);
+				toggleHglCacheLine("blue-8", line);
 				// Update the tag
 				updateTag(line, tag);
 				// Update valid bit if it is 0
-				if (validBit == 0) updateValidBit(line, 1);
+				if (validBit == 0) {
+					updateValidBit(line, 1);
+					toggleHglValid("blue-8", line);
+				}
 
 				addTime(tBt);
 				updateAccessTT(tBT);
@@ -669,6 +716,15 @@ function endOfSimulation() {
 	// Print total times in access time table
 	timeSum = accessTT.find("tr:eq(0) > td:eq(0)");
 	timeSum.html(timeSum.html().slice(0, -3));
+
+	// Remove highlights
+	toggleHglMmBlock("", mmLine);
+	toggleHglValid();
+	toggleHglDirty("", line);
+	toggleHglTag();
+	toggleHglReplBits();
+	toggleHglCacheLine("", line);
+	toggleHglSimMsg();
 
 	// Reset variables
 	hitLine = line = null;
@@ -838,9 +894,8 @@ function transferBlock(line, block) {
  * @param {String} msg the message to get printed
  * @param {String} bgColor the background for the message wrapper
  */
-function simMsg(msg, bgColor = "#fff") {
+function simMsg(msg) {
 	$("#simMsg").html(msg);
-	$("#simMsg").css("background-color", bgColor);
 }
 
 /**
@@ -867,6 +922,9 @@ function addTime(cycles) {
  */
 function setupAccessTimeChart() {
 	var ctxL = document.getElementById("accessTimeChart").getContext("2d");
+	var gradientFill = ctxL.createLinearGradient(0, 0, 0, 290);
+	gradientFill.addColorStop(0, "rgba(0, 125, 250, 1)");
+	gradientFill.addColorStop(1, "rgba(0, 125, 250, 0.1)");
 	accessTimeChart = new Chart(ctxL, {
 		type: "line",
 		data: {
@@ -875,9 +933,11 @@ function setupAccessTimeChart() {
 				{
 					label: "Access time per instruction",
 					data: [],
-					backgroundColor: ["rgba(66, 133, 244, .3)"],
-					borderColor: ["rgba(66, 133, 244, .7)"],
+					backgroundColor: gradientFill,
+					borderColor: ["#007DFA"],
 					borderWidth: 2,
+					pointBorderColor: "#007DFA",
+					pointBackgroundColor: "rgba(0, 125, 250, 1)",
 				},
 			],
 		},
@@ -890,7 +950,7 @@ function setupAccessTimeChart() {
 						},
 						scaleLabel: {
 							display: true,
-							labelString: "Instruction",
+							// labelString: "Instruction",
 						},
 					},
 				],
@@ -906,7 +966,7 @@ function setupAccessTimeChart() {
 						},
 						scaleLabel: {
 							display: true,
-							labelString: "Access time",
+							// labelString: "Access time",
 						},
 					},
 				],

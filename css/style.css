@@ -70,10 +70,6 @@ body {
 	padding: 0.5rem 1rem;
 }
 
-.sim-msg {
-	background-color: #fff;
-}
-
 table .th-sm {
 	min-width: 0;
 }
@@ -160,8 +156,17 @@ table .th-sm {
 /* </> Simulator wrapper */
 
 /* Statistics */
+
 .statistics > .card {
-	min-width: 400px;
+	min-width: 450px;
+}
+
+.calc-table {
+	height: 100%;
+}
+
+.statistics .card:nth-child(3) {
+	flex-grow: 0.5;
 }
 /* </> Statistics */
 
@@ -190,3 +195,31 @@ table .th-sm {
 		font-size: 18px;
 	}
 }
+
+/* Colors */
+.red-5 {
+	background-color: rgba(236, 112, 99, 0.5);
+	transition: background-color 0.3s;
+}
+
+.green-5 {
+	background-color: rgba(88, 214, 141, 0.5);
+	transition: background-color 0.3s;
+}
+
+.blue-8 {
+	background-color: rgba(93, 173, 226, 0.8);
+	transition: background-color 0.3s;
+}
+
+.grey-5 {
+	background-color: rgba(170, 183, 184, 0.5);
+	transition: background-color 0.3s;
+}
+
+.yellow-5 {
+	background-color: rgba(244, 208, 63, 0.5);
+	transition: background-color 0.3s;
+}
+
+/* </> Colors */

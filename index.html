@@ -19,7 +19,9 @@
 		<link rel="stylesheet" href="css/style.css" />
 	</head>
 	<body>
+		<!-- SVG for simulator circuits -->
 		<svg id="circuitsSVG"></svg>
+
 		<!-- Sidenav for simulator setup -->
 		<div id="setupSidenav" class="setup-sidenav">
 			<!-- Navbar -->
@@ -30,11 +32,13 @@
 						<i class="fas fa-bars fa-1x"></i>
 					</span>
 				</button>
-
 				<!-- Logo -->
 				<a href="" class="navbar-brand mr-auto">Simulator setup</a>
+				<!-- How to use button -->
+				<a class="btn btn-sm btn-info" data-toggle="modal" data-target="#centralModalSm"><i class="fas fa-info"></i></a>
 			</nav>
 
+			<!-- Simulator setup form -->
 			<form name="setupForm" class="setup-form scrollbar-primary" action="" onsubmit="return onSubmit()">
 				<!-- Block and word section -->
 				<h4>Block and word</h4>
@@ -57,7 +61,6 @@
 						<span class="input-group-text md-addon">bytes</span>
 					</div>
 				</div>
-				<!-- </> Block and word section -->
 
 				<hr />
 
@@ -92,7 +95,6 @@
 						<span class="input-group-text md-addon">cycles</span>
 					</div>
 				</div>
-				<!-- </> Main memory section -->
 
 				<hr />
 
@@ -117,7 +119,6 @@
 						<span class="input-group-text md-addon">cycles</span>
 					</div>
 				</div>
-				<!-- </> Cache memory section -->
 
 				<hr />
 
@@ -137,6 +138,7 @@
 						Set-Associative
 					</label>
 				</div>
+
 				<!-- Number of sets -->
 				<div class="md-form input-group mt-2 mb-3">
 					<div class="input-group-prepend">
@@ -147,7 +149,6 @@
 						<span class="input-group-text md-addon">lines/set</span>
 					</div>
 				</div>
-				<!-- </> Placement policy section -->
 
 				<hr />
 
@@ -174,7 +175,6 @@
 						Write around
 					</label>
 				</div>
-				<!-- </> Writing policy -->
 
 				<hr />
 
@@ -194,16 +194,13 @@
 						FIFO
 					</label>
 				</div>
-				<!-- </> Replacement policy -->
 
 				<hr />
 
 				<!-- Submit / Reset -->
 				<button id="submit" type="submit" value="submit" class="btn btn-info btn-lg w-100">Submit</button>
-				<!-- </> Submit / Reset -->
 			</form>
 		</div>
-		<!-- </> Sidenav for simulator setup -->
 
 		<!-- Main -->
 		<div id="main" class="main">
@@ -220,6 +217,7 @@
 				<a href="" class="navbar-brand mr-auto">CMSimulator</a>
 			</nav>
 
+			<!-- Simulator wrapper, everything apart from the setup sidenav -->
 			<div class="sim-main p-4 mt-3">
 				<!-- Card deck -->
 				<div class="card-deck">
@@ -239,6 +237,8 @@
 								</div>
 							</div>
 						</div>
+
+						<!-- Random and send buttons -->
 						<div class="card-footer">
 							<div class="btn-group w-100" role="group" aria-label="Instruction input options">
 								<button id="genRandAddr" type="button" class="btn btn-info btn-sm" onclick="getRandomAddr()">
@@ -248,14 +248,13 @@
 								<button id="send" type="button" class="btn btn-info btn-sm" onclick="processAddr()">Send <i class="fas fa-microchip"></i></button>
 							</div>
 						</div>
-						<!-- Address input -->
 					</div>
 
 					<!-- Instruction breakdown -->
 					<div class="breakdown card top-card text-white mb-5" style="background-color: #343a40">
 						<div class="card-header"><i class="fas fa-columns"></i> Breakdown</div>
 						<div class="card-body">
-							<!--Table-->
+							<!--Breakdown table-->
 							<table id="breakdown" class="table table-dark text-center">
 								<!--Table head-->
 								<thead>
@@ -277,14 +276,16 @@
 							</table>
 						</div>
 					</div>
+
 					<!-- Simulator status -->
 					<div id="simMsgWrapper" class="card top-card mb-5">
 						<div class="card-header"><i class="far fa-comment-alt"></i> Simulation messages</div>
 
 						<!-- Simulation messages -->
 						<div id="simMsg" class="sim-msg card-body">Waiting for instruction...</div>
+
+						<!-- Simulator controls -->
 						<div class="card-footer">
-							<!-- Simulator controls -->
 							<div class="btn-group w-100" role="group" aria-label="Simulator controls">
 								<button id="next" type="button" class="btn btn-info btn-sm" onclick="stage++; step();">Next <i class="fas fa-angle-right"></i></button>
 								<button id="fastForward" type="button" class="btn btn-info btn-sm" onclick="fastForward()">
@@ -295,6 +296,7 @@
 						</div>
 					</div>
 				</div>
+
 				<!-- Simulator: cache and main memory -->
 				<div class="simulator-wrapper row justify-content-between">
 					<!-- Cache memory -->
@@ -323,17 +325,15 @@
 					</div>
 				</div>
 
-				<!-- Formulas, cycles and statistics -->
+				<!-- Charts and formulas -->
 				<div class="statistics card-deck flex-wrap">
+					<!-- Access times -->
 					<div class="card mt-4">
-						<!-- Access time header -->
 						<div class="card-header"><i class="fas fa-hourglass-end"></i> Access time per instruction</div>
 						<div class="card-body">
-							<!-- Access times chart -->
 							<canvas id="accessTimeChart"></canvas>
 						</div>
 						<div class="card-footer p-0">
-							<!-- Current instruction access time & total time table -->
 							<table id="accessTimeTable" class="access-time-table table table-bordered table-sm text-center mb-0">
 								<thead>
 									<tr>
@@ -352,7 +352,7 @@
 						</div>
 					</div>
 
-					<!-- Hit/miss rate chart -->
+					<!-- Hit/miss rate -->
 					<div class="card mt-4">
 						<div class="card-header"><i class="far fa-dot-circle"></i> Hit/Miss rate</div>
 						<div class="card-body">
@@ -376,7 +376,7 @@
 						</div>
 					</div>
 
-					<!-- Calculations table -->
+					<!-- Calculations -->
 					<div id="calcTableWrapper" class="card calc-table-wrapper mt-4">
 						<div class="card-header"><i class="fas fa-calculator"></i> Formulas</div>
 						<div class="card-body p-0">
@@ -413,6 +413,79 @@
 								</tbody>
 							</table>
 						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- How to use simulator modal -->
+		<div class="modal fade" id="centralModalSm" tabindex="-1" role="dialog" aria-labelledby="howToUseSimulator" aria-hidden="true">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title w-100" id="myModalLabel">How does the simulator work?</h4>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<!-- Vertical Steppers -->
+						<div class="row mt-1">
+							<div class="col-md-12">
+								<!-- Stepers Wrapper -->
+								<ul class="stepper stepper-vertical">
+									<!-- First Step -->
+									<li class="active">
+										<a href="#!">
+											<span class="circle">1</span>
+											<span class="label">Set up the memories</span>
+										</a>
+
+										<!-- Section Description -->
+										<div class="step-content grey lighten-3">
+											<img src="img/howItWorks/Step 1.gif" alt="Step 1" class="img-fluid z-depth-1" />
+											<br /><br />
+											<p><b>Configure the simulator to your needs</b>: memory and block sizes, access times and also writing, placement and replacement policies.</p>
+										</div>
+									</li>
+
+									<!-- Second Step -->
+									<li class="active">
+										<!--Section Title -->
+										<a href="#!">
+											<span class="circle">2</span>
+											<span class="label">Send instructions and get the control of the simulation</span>
+										</a>
+
+										<!-- Section Description -->
+										<div class="step-content grey lighten-3">
+											<img src="img/howItWorks/Step 2.gif" alt="Step 2" class="img-fluid z-depth-1" />
+											<br /><br />
+											<p>Enter an address or generate a random one in the <i>Instruction</i> section. You can now <b>control the flow of the simulator</b> using the buttons in the <i>Simulation messages</i> section.</p>
+										</div>
+									</li>
+
+									<!-- Third Step -->
+									<li class="active">
+										<a href="#!">
+											<span class="circle">3</span>
+											<span class="label">Analyze the results</span>
+										</a>
+
+										<!-- Section Description -->
+										<div class="step-content grey lighten-3">
+											<img src="img/howItWorks/Step 3.gif" alt="Step 3" class="img-fluid z-depth-1" />
+											<br /><br />
+											<p><b>Access times and hit/miss rate are displayed in the chart below the table</b>, as well as the calculus used for the address breakdown.</p>
+										</div>
+									</li>
+								</ul>
+								<!-- /.Stepers Wrapper -->
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Close</button>
 					</div>
 				</div>
 			</div>

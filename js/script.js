@@ -18,6 +18,7 @@ var validSetup = false;
 var brAddrBits, brByteBits, brWordBits, brBlockBits, brTagBits, brLineBits, brSetBits;
 brAddrBits = brByteBits = brWordBits = brBlockBits = brTagBits = brLineBits = brSetBits = 0;
 
+// Auxiliary variables
 var addr, line, mmLine, hitLine, hitWay, dirtyBit;
 
 // Binary address
@@ -429,6 +430,7 @@ function buildMM() {
 		mmT.append(row);
 	}
 }
+
 /**
  * Returns a random valid address (byte)
  */
@@ -719,12 +721,15 @@ function storeStep() {
 				}
 
 				addTime(tBt);
-				updateAccessTT(tBT);
+				updateAccessTT(tBt);
 			}
 			break;
 	}
 }
 
+/**
+ * Executes all the remaining steps for the current instruction
+ */
 function fastForward() {
 	while (stage != -1) {
 		stage++;
@@ -757,6 +762,7 @@ function endOfSimulation() {
 	toggleComparator();
 	toggleAndGate();
 
+	// Remove wires and logic units
 	toggleBrtagCtagWs();
 	toggleBrsetCsetWs();
 	toggleBrtagComp();
@@ -766,7 +772,6 @@ function endOfSimulation() {
 
 	// Reset variables
 	hitLine = hitTable = hitWay = line = null;
-
 	msg = "";
 	validBit = -1;
 	stage = -1;
@@ -951,6 +956,11 @@ function toggleSimBtns() {
 	fastForwardBtn.toggleClass("disabled");
 }
 
+/**
+ * Updates the total and partial time with the cycles
+ * passed by parameter
+ * @param {Number} cycles
+ */
 function addTime(cycles) {
 	pTime += cycles;
 	tTime += cycles;

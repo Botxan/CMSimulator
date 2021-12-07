@@ -3,6 +3,16 @@ var connections = [];
 var svg = $("#circuitsSVG");
 var sets;
 
+/**
+ * Draws the path in the screen depending on the given parameters.
+ * @param {SVGPathElement} path the path to be drawn
+ * @param {Number} startX the starting X position
+ * @param {Number} startY the starting Y position
+ * @param {Number} endX the ending X position
+ * @param {Number} endY the ending Y position
+ * @param {String} outputDir the side from where the path is arriving to the element
+ * @param {String} inputDir the side from where the path is leaving the source element
+ */
 function drawPath(path, startX, startY, endX, endY, outputDir, inputDir) {
 	if (outputDir === "bottom" && inputDir === "top") {
 		path.attr("d", "M" + startX + " " + startY + " V" + (startY + 40) + " H" + endX + " V" + endY);
@@ -12,6 +22,16 @@ function drawPath(path, startX, startY, endX, endY, outputDir, inputDir) {
 	}
 }
 
+/**
+ * Adjusts the input and output of the given path.
+ * @param {SVGPathElement} path the SVG path to be adjusted
+ * @param {HTMLElement} outputEl the element that marks the end point of the path
+ * @param {HTMLElement} inputEl the element that marks the starting point of the path
+ * @param {String} outputDir the side from where the path is arriving to the element
+ * @param {String} inputDir the side from where the path is leaving the source element
+ * @param {Number} inputN in case the destination element has more than one input
+ * it is the flag that indicates the output position of the path
+ */
 function connectElements(path, outputEl, inputEl, outputDir, inputDir, inputN) {
 	// if first element is lower than the second, swap!
 	if (outputEl.offset().top > inputEl.offset().top) {
@@ -78,6 +98,9 @@ function connectElements(path, outputEl, inputEl, outputDir, inputDir, inputN) {
 	drawPath(path, startX, startY, endX, endY, outputDir, inputDir, inputN);
 }
 
+/**
+ * Calls to connectElement with all the paths stored in connections array.
+ */
 function connectAll() {
 	// connect all elements that are in connections array
 	connections.forEach(function (connection) {
@@ -85,7 +108,12 @@ function connectAll() {
 	});
 }
 
-function createPath(svg, id) {
+/**
+ * Creates an SVG path element with the id passed by parameter.
+ * @param {String} id the path id attribute
+ * @returns SVG path element
+ */
+function createPath(id) {
 	let newpath = document.createElementNS("http://www.w3.org/2000/svg", "path");
 	$(newpath).attr({
 		id: id,
@@ -96,6 +124,9 @@ function createPath(svg, id) {
 	return newpath;
 }
 
+/**
+ * Creates the corresponding wires and functional units according to the placement policy.
+ */
 function drawCircuits() {
 	sets = 1;
 	if (ppolicy == "setAssociative") sets = nway;
@@ -124,14 +155,30 @@ function drawCircuits() {
 	connectAll();
 }
 
+/**
+ * Auxiliar function to create a path and push it to the array of connections.
+ * @param {String} id path id
+ * @param {HTMLElement} output path source HTML element
+ * @param {HTMLElement} input path destination HTML element
+ * @param {String} outputDir the side from where the path is arriving to the element
+ * @param {String} inputDir the side from where the path is leaving the source element
+ * @param {Number} nInput in case the destination element has more than one input
+ * it is the flag that indicates the output position of the path
+ */
 function addCircuitWire(id, output, input, outputDir, inputDir, nInput) {
 	// Create the path
-	newpath = createPath(svg, id);
+	newpath = createPath(id);
 
 	// Add new wire to array of wires
 	connections.push([$(newpath), output, input, outputDir, inputDir, nInput]);
 }
 
+/**
+ * Shows/Hides the given circuit element, with the color passed
+ * by parameter.
+ * @param {HTMLElement} el the element of the circuit
+ * @param {String} color the color with which display the element
+ */
 function toggleCircuitEl(el, color = "") {
 	// Remove element if no color is specified
 	if (!color) {
@@ -151,6 +198,9 @@ $(document).ready(function () {
 	connectAll();
 });
 
+/**
+ * Maintains SVG's responsiveness when resizing the window/browser.
+ */
 $(window).resize(function () {
 	$("#circuitsSVG").css("height", window.document.body.scrollHeight);
 	connectAll();
@@ -158,37 +208,76 @@ $(window).resize(function () {
 
 /* ***** Cable toggling functions ***** */
 
+/**
+ * Displays/Hides the wires that connect the tag cell from breakdown table to
+ * cache tables.
+ * @param {String} color wire color
+ */
 function toggleBrtagCtagWs(color = "") {
 	if (ppolicy === "setAssociative") sets = nway;
 	for (i = 0; i < sets; i++) toggleCircuitEl($("#ItagbreakdownOtagcache" + i), color);
 }
 
+/**
+ * Displays/Hides the wires that connect the set cell from breakdown table to
+ * cache tables.
+ * @param {String} color wire color
+ */
 function toggleBrsetCsetWs(color = "") {
 	if (ppolicy === "fullyAssociative") for (i = 0; i < nway - 1; i++) toggleCircuitEl($("#IbreakdownOsetcache" + i), color);
 	else toggleCircuitEl($("#IbreakdownOsetcache" + set), color);
 }
 
+/**
+ * Displays/Hides the wires that connect the tag cell from breakdown table to
+ * comparators.
+ * @param {String} color wire color
+ */
 function toggleBrtagComp(color = "") {
 	if (ppolicy == "setAssociative") sets = nway;
 	for (i = 0; i < sets; i++) toggleCircuitEl($("#ItagbreakdownOcomparator" + i), color);
 }
 
+/**
+ * Displays/Hides the wires that connect the tag cell from cache tables to
+ * comparators.
+ * @param {String} color wire color
+ */
 function toggleCtagComp(color = "") {
 	for (i = 0; i < sets; i++) toggleCircuitEl($("#ItagcacheOcomparator" + i), color);
 }
 
+/**
+ * Displays/Hides the wires that connect the valid cell from cache tables to
+ * AND gates.
+ * @param {String} color wire color
+ */
 function toggleValidAnd(color = "") {
 	for (i = 0; i < sets; i++) toggleCircuitEl($("#IvalidcacheOand" + i), color);
 }
 
+/**
+ * Displays/Hides the wires that connect the tag cell from comparators to
+ * AND gates.
+ * @param {String} color wire color
+ */
 function toggleCompAnd(color = "") {
 	for (i = 0; i < sets; i++) toggleCircuitEl($("#IcomparatorOand" + i), color);
 }
 
+/**
+ * Displays/Hides comparatos.
+ * @param {String} on flag to show or hide the comparator
+ */
 function toggleComparator(on) {
 	for (i = 0; i < sets; i++) toggleCircuitEl($("#comparatorWay" + i), on);
 }
 
+/**
+ * Displays/Hides AND gates.
+ * @param {String} src the source of the AND gate picture
+ * @param {String} hitWay identifier of the table where the hit occurred
+ */
 function toggleAndGate(src, hitWay = -1) {
 	if (src) {
 		for (i = 0; i < sets; i++) {

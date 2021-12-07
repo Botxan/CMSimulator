@@ -77,10 +77,11 @@ body {
 	padding: 0.5rem 1rem;
 }
 
+/* </> Card */
+
 table .th-sm {
 	min-width: 0;
 }
-/* </> Card */
 
 /* Simulator wrapper */
 .simulator-wrapper {
@@ -212,6 +213,21 @@ table .th-sm {
 }
 
 /* </> SVG */
+
+/* Modal */
+.modal-dialog {
+	max-width: 1200px;
+}
+
+.modal-body,
+.stepper {
+	padding-top: 0 !important;
+}
+
+.stepper {
+	padding-right: 3rem !important;
+}
+/* </> Modal */
 
 /* </> scrollbar modifications */
 

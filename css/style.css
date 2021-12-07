@@ -73,6 +73,10 @@ body {
 	padding: 0;
 }
 
+.breakdown table {
+	table-layout: fixed;
+}
+
 .card-footer {
 	padding: 0.5rem 1rem;
 }

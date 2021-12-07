@@ -1,3 +1,11 @@
+html,
+body,
+.cm,
+.cm-wrapper {
+	width: 100%;
+	height: 100%;
+}
+
 body {
 	background-color: #f1f1f1;
 }
@@ -47,7 +55,6 @@ body {
 
 /* nav */
 .main > .navbar {
-	position: fixed;
 	width: 100%;
 	z-index: 1;
 }
@@ -84,7 +91,8 @@ table .th-sm {
 .simulator-wrapper td,
 .simulator-wrapper th {
 	width: 5px !important;
-	padding: 0 !important;
+	padding: 0px 0px !important;
+	overflow: hidden;
 }
 
 .cm-wrapper,
@@ -108,6 +116,11 @@ table .th-sm {
 	border: 2px dashed #1c6ea4;
 	background-color: rgba(253, 235, 208, 0.5);
 }
+
+.cm {
+	padding-bottom: 15px;
+}
+
 .cm-header,
 .mm-header {
 	width: 190px;
@@ -135,8 +148,10 @@ table .th-sm {
 }
 
 .cm .table-wrapper .table {
+	table-layout: fixed;
 	background-color: #fff;
 	margin: 0;
+	overflow: hidden;
 }
 
 .mm .table-wrapper {
@@ -185,6 +200,19 @@ table .th-sm {
 .scrollbar-primary {
 	scrollbar-color: #4285f4 #f5f5f5;
 }
+
+/* SVG */
+
+#circuitsSVG {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+/* </> SVG */
+
 /* </> scrollbar modifications */
 
 @media screen and (max-height: 450px) {

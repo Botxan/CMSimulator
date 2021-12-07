@@ -1,0 +1,20 @@
+<svg width="315" height="225" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <clipPath id="1">
+   <path d="m0,0l236,0l0,0l0,169l0,0l-236,0l0,0l0,-169z" clip-rule="evenodd" id="svg_1"/>
+  </clipPath>
+ </defs>
+ <g>
+  <title>Layer 1</title>
+  <g id="svg_2" transform="matrix(1.3333 0 0 1.3333 0 0)">
+   <g id="svg_3" clip-path="url(#1)">
+    <path fill-rule="nonzero" fill="#000000" d="m117.49998,161.00003l0,0l0,0l-112.5,0l0,0l0,-77.50001l0,0l0,-77.5l0,0l112.5,0l0,0l112.49999,0l0,0l0,77.5l0,0l0,77.50001l0,0l-112.49999,0zm0.5,-161.00001l0,0l0,0l-118,0l0,0l0,84.5l0,0l0,84.50001l0,0l118,0l0,0l117.99999,0l0,0l0,-84.50001l0,0l0,-84.5l0,0l-117.99999,0z" id="svg_4"/>
+    <path fill-rule="nonzero" fill="#000000" d="m120.49998,70.00002l0,0l0,0l-3.5,0l0,0l0,25l0,0l0,25l0,0l3.5,0l0,0l3.5,0l0,0l0,-25l0,0l0,-25l0,0l-3.5,0z" id="svg_5"/>
+    <path fill-rule="nonzero" fill="#000000" d="m104.49998,70.00002l0,0l0,0l-3.5,0l0,0l0,25l0,0l0,25l0,0l3.5,0l0,0l3.5,0l0,0l0,-25l0,0l0,-25l0,0l-3.5,0z" id="svg_6"/>
+   </g>
+  </g>
+  <rect stroke="#000" id="svg_12" height="208.59598" width="300.57307" y="7.84384" x="6.39685" stroke-width="0" fill="#ffffff"/>
+  <rect id="svg_8" height="66.82316" width="9.70266" y="93.29028" x="134.51875" stroke-width="0" stroke="#000" fill="#000000"/>
+  <rect id="svg_9" height="66.82316" width="9.70266" y="93.29028" x="155.78855" stroke-width="0" stroke="#000" fill="#000000"/>
+ </g>
+</svg>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="343" height="419" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="1">
+      <path id="svg_1" clip-rule="evenodd" d="m0,0l257,0l0,0l0,314l0,0l-257,0l0,0l0,-314z"/>
+    </clipPath>
+  </defs>
+  <g transform="matrix(1, 0, 0, 1, 0.000061, -0.000041)">
+    <title>Layer 1</title>
+    <g transform="matrix(1.3333 0 0 1.3333 0 0)" id="svg_2">
+      <g clip-path="url(#1)" id="svg_3">
+        <path id="svg_4" d="m243.79996,212.50005c-10.90001,41.39999 -39.4,72.3 -78.59999,85.50001l0,0l0,0c-61.4,20.5 -129.2,-13.40002 -149.6,-74.90002l0,0l0,0c-6.6,-19.80001 -6.6,-20.2 -6.6,-122.30001l0,0l0,-91.8l0,0l118.99999,0l0,0l119.1,0l0,0l-0.3,96.8l0,0l-0.40001,96.70002l0,0l-2.59999,10zm-115.30001,-212.50002l0,0l0,0l-128.49998,0l0,0l0,103.3l0,0l0,0c0,98.5 0.1,103.60001 1.9,111.20002l0,0l0,0c12,49.8 50.5,87.4 99.99999,97.50001l0,0l0,0c13.90001,2.79999 38.30001,2.79999 52.2,0l0,0l0,0c25.2,-5.20001 46.89999,-16.90002 65.39999,-35.50003l0,0l0,0c19.30001,-19.19998 31.4,-42.39999 35.9,-68.49998l0,0l0,0c1.40001,-8.20002 1.59999,-21.80001 1.59999,-108.70002l0,0l0,-99.3l0,0l-128.49999,0z" fill="#000000" fill-rule="nonzero"/>
+      </g>
+    </g>
+    <ellipse fill="#fc7997" opacity="NaN" cx="170.59671" cy="255.63691" id="svg_8" rx="158.54834" ry="150.62092" stroke-width="0" stroke="#000"/>
+    <rect fill="#fc7997" stroke-width="0" opacity="NaN" x="12.04837" y="12.1129" width="317.09677" height="242.90321" id="svg_12" stroke="#000"/>
+    <rect fill="#000000" stroke="#000" stroke-width="0" x="329.04793" y="10.77398" width="1.09589" height="52.0548" id="svg_13"/>
+    <rect fill="#000000" stroke="#000" stroke-width="0" x="329.04793" y="62.28083" width="1.64384" height="14.52055" id="svg_14"/>
+    <text id="svg_5" style="font-family: &quot;Microsoft Yi Baiti&quot;; font-size: 150px; stroke: rgb(0, 0, 0); stroke-width: 0px; white-space: pre;" x="31.187" y="236.613">MISS</text>
+  </g>
+</svg>

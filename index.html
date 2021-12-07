@@ -19,6 +19,7 @@
 		<link rel="stylesheet" href="css/style.css" />
 	</head>
 	<body>
+		<svg id="circuitsSVG"></svg>
 		<!-- Sidenav for simulator setup -->
 		<div id="setupSidenav" class="setup-sidenav">
 			<!-- Navbar -->
@@ -219,7 +220,7 @@
 				<a href="" class="navbar-brand mr-auto">CMSimulator</a>
 			</nav>
 
-			<div class="sim-main p-4 mt-5">
+			<div class="sim-main p-4 mt-3">
 				<!-- Card deck -->
 				<div class="card-deck">
 					<!-- Instruction processing -->
@@ -244,9 +245,7 @@
 									Gen. Rand. Addr.
 									<i class="fas fa-random"></i>
 								</button>
-								<button id="send" type="button" class="btn btn-info btn-sm" onclick="processAddr()">
-									Send <i class="fas fa-microchip"></i>
-								</button>
+								<button id="send" type="button" class="btn btn-info btn-sm" onclick="processAddr()">Send <i class="fas fa-microchip"></i></button>
 							</div>
 						</div>
 						<!-- Address input -->
@@ -278,7 +277,6 @@
 							</table>
 						</div>
 					</div>
-
 					<!-- Simulator status -->
 					<div id="simMsgWrapper" class="card top-card mb-5">
 						<div class="card-header"><i class="far fa-comment-alt"></i> Simulation messages</div>
@@ -288,9 +286,7 @@
 						<div class="card-footer">
 							<!-- Simulator controls -->
 							<div class="btn-group w-100" role="group" aria-label="Simulator controls">
-								<button id="next" type="button" class="btn btn-info btn-sm" onclick="stage++; step();">
-									Next <i class="fas fa-angle-right"></i>
-								</button>
+								<button id="next" type="button" class="btn btn-info btn-sm" onclick="stage++; step();">Next <i class="fas fa-angle-right"></i></button>
 								<button id="fastForward" type="button" class="btn btn-info btn-sm" onclick="fastForward()">
 									Fast Forward
 									<i class="fas fa-angle-double-right"></i>
@@ -308,6 +304,7 @@
 								<h4>Cache memory</h4>
 							</div>
 							<div id="cmTables" class="row flex-nowrap"></div>
+							<div id="circuits" class="row flex-nowrap mt-5"></div>
 						</div>
 					</div>
 
@@ -433,5 +430,7 @@
 		<script src="js/script.js"></script>
 		<!-- Own DOM animations JS -->
 		<script src="js/domHighlight.js"></script>
+		<!-- Simulator circuits -->
+		<script src="js/circuits.js"></script>
 	</body>
 </html>

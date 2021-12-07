@@ -18,7 +18,7 @@ var validSetup = false;
 var brAddrBits, brByteBits, brWordBits, brBlockBits, brTagBits, brLineBits, brSetBits;
 brAddrBits = brByteBits = brWordBits = brBlockBits = brTagBits = brLineBits = brSetBits = 0;
 
-var addr, line, mmLine, hitLine, dirtyBit;
+var addr, line, mmLine, hitLine, hitWay, dirtyBit;
 
 // Binary address
 var binAddr;
@@ -295,6 +295,9 @@ function setupSimulator() {
 	// Draw cache memory table/s
 	buildCM();
 
+	// Build sim circuits
+	drawCircuits();
+
 	// Draw main memory table
 	buildMM();
 
@@ -361,6 +364,7 @@ function updateBreakdownTable(tag, set, word, byte) {
  */
 function buildCM() {
 	let cmtables = $("#cmTables");
+	let circuits = $("#circuits");
 	let sets = 1;
 	if (ppolicy == "setAssociative") sets = nway;
 
@@ -370,30 +374,44 @@ function buildCM() {
 		let wrapper = $("<div>").addClass("table-wrapper col-" + 12 / sets);
 		let table = $("<table>")
 			.attr("id", "way-" + i)
-			.addClass("table table-bordered table-sm text-center z-depth-1");
+			.addClass("table table-bordered table-sm text-center z-depth-1")
+			.css("opacity", 0.85);
 		table.append("<thead><tr><th>set</th><th>valid</th><th>dirty</th><th>tag</th><th>repl</th><th colspan='" + blsize + "'>block</th></thead>");
 		table.append("<tbody>");
 		// Lines per set
 		for (j = 0; j < lines / sets; j++) {
-			table.append(
-				"<tr><td>" +
-					(ppolicy == "fullyAssociative" ? "-" : j) +
-					"</td><td>0</td><td>0</td><td>-</td><td>" +
-					(rpolicy === "random"
-						? "-"
-						: ppolicy == "fullyAssociative"
-						? toPaddedBinary(j, Math.log2(nway))
-						: ppolicy == "setAssociative"
-						? toPaddedBinary(i, Math.log2(nway))
-						: "-") +
-					"</td>" +
-					new Array(blsize + 1).join("<td>-</td>") +
-					"</tr>"
-			);
+			table.append("<tr><td>" + (ppolicy == "fullyAssociative" ? "-" : j) + "</td><td>0</td><td>0</td><td>-</td><td>" + (rpolicy === "random" ? "-" : ppolicy == "fullyAssociative" ? toPaddedBinary(j, Math.log2(nway)) : ppolicy == "setAssociative" ? toPaddedBinary(i, Math.log2(nway)) : "-") + "</td>" + new Array(blsize + 1).join("<td>-</td>") + "</tr>");
 		}
 		table.append("</tbody>");
 		wrapper.append(table);
 		cmtables.append(wrapper);
+
+		// Build logic gates and comparators
+		let tableCircuits = $("<div>")
+			.addClass("col-" + 12 / sets + " d-flex flex-column")
+			.css("width", "100px");
+
+		let comparator = $("<img />", {
+			id: "comparatorWay" + i,
+			src: "img/comparator.svg",
+			alt: "comparator",
+			class: "align-self-center",
+			style: "width: 4em; height: 3em; opacity: 0; transition: opacity 0.3s;",
+		});
+
+		let andGate = $("<img />", {
+			id: "andGateWay" + i,
+			src: "img/AND.svg",
+			alt: "AND-gate",
+			class: "align-self-center mt-5 mr-5",
+			style: "width: 5em; height: 6em; opacity: 0; transition: opacity 0.3s;",
+		});
+
+		tableCircuits.append(comparator);
+		tableCircuits.append(andGate);
+		circuits.append(tableCircuits);
+
+		$("#circuitsSVG").css("height", window.document.body.scrollHeight);
 	}
 }
 
@@ -514,6 +532,16 @@ function step() {
 					simMsg("Placement policy is set associative. Valid bit and tag are compared with every line of the corresponding set.");
 					break;
 			}
+			// Draw wires breakdown(tag)->cache(tag) && breakdown(set)->cache(set) && breakdown(tag)->comparator
+			toggleComparator("#555");
+			toggleAndGate("img/AND.svg");
+
+			toggleBrtagCtagWs("#555");
+			toggleBrsetCsetWs("#555");
+			toggleBrtagComp("#555");
+			toggleCtagComp("#555");
+			toggleCompAnd("#555");
+			toggleValidAnd("#555");
 
 			// Highlight valid bit and tag columns
 			toggleHglValid("yellow-5");
@@ -531,15 +559,21 @@ function step() {
 				toggleHglSimMsg("green-5");
 				line = hitLine;
 				validBit = line.find("td:eq(1)").html();
+
+				hitTable = $(hitLine).closest("table");
+				hitWay = parseInt(hitTable.attr("id").charAt(hitTable.attr("id").length - 1));
 			} else {
 				// Highlight all the lines according to the placement policy
 				toggleHglValid("red-5");
 				toggleHglTag("red-5");
+
 				simMsg("Since there is not a line with the valid bit to 1 and same tag, it is a cache <b>miss</b>.");
 				toggleHglSimMsg("red-5");
 				line = rpolicy === "random" && ppolicy != "directMap" ? getRandomLine() : getOldestLine();
 				validBit = line.find("td:eq(1)").html();
 			}
+
+			toggleAndGate("img/ANDmiss.svg", hitWay);
 			updateHitMissRateChart(hit);
 			break;
 
@@ -573,7 +607,6 @@ function loadStep() {
 			if (hit) {
 				msg = "Block is directly updated in the cache memory. ";
 				toggleHglCacheLine("blue-8", line);
-				// toggleHglCacheLine(line);
 				if (!isDirty(line)) {
 					msg += "The dirty bit is set to 1.";
 					updateDirtyBit(line, 1);
@@ -641,11 +674,7 @@ function storeStep() {
 			} else {
 				// write around case: only main memory is updated
 				if (walloc === "writeAround") {
-					simMsg(
-						"The write policy is <b>" +
-							(wpolicy == "writeThrough" ? "Write Through" : "Write Back") +
-							"</b> with <b>Write Around</b>, so the block is going to be updated just in main memory."
-					);
+					simMsg("The write policy is <b>" + (wpolicy == "writeThrough" ? "Write Through" : "Write Back") + "</b> with <b>Write Around</b>, so the block is going to be updated just in main memory.");
 					addTime(tMM);
 					updateAccessTT(tMM);
 					stage = 5; // En of simulation
@@ -672,9 +701,7 @@ function storeStep() {
 			} else {
 				// write on allocate
 				if (wpolicy === "writeBack") {
-					simMsg(
-						"The requested block is transfered from main memory to cache memory. New data is writen into the cache block. Dirty bit is set to 1."
-					);
+					simMsg("The requested block is transfered from main memory to cache memory. New data is writen into the cache block. Dirty bit is set to 1.");
 					updateDirtyBit(line, 1);
 					toggleHglDirty("blue-8", line);
 				} else {
@@ -726,8 +753,20 @@ function endOfSimulation() {
 	toggleHglCacheLine("", line);
 	toggleHglSimMsg();
 
+	// Remove wires and functional units
+	toggleComparator();
+	toggleAndGate();
+
+	toggleBrtagCtagWs();
+	toggleBrsetCsetWs();
+	toggleBrtagComp();
+	toggleCtagComp();
+	toggleCompAnd();
+	toggleValidAnd();
+
 	// Reset variables
-	hitLine = line = null;
+	hitLine = hitTable = hitWay = line = null;
+
 	msg = "";
 	validBit = -1;
 	stage = -1;

@@ -609,11 +609,6 @@ function loadStep() {
 			if (hit) {
 				msg = "Block is directly updated in the cache memory. ";
 				toggleHglCacheLine("blue-8", line);
-				if (!isDirty(line)) {
-					msg += "The dirty bit is set to 1.";
-					updateDirtyBit(line, 1);
-					toggleHglDirty("blue-8", line);
-				}
 				simMsg(msg);
 			} else {
 				if (isDirty(line)) {
